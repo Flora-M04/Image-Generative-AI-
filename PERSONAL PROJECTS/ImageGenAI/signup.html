@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — PixelMind AI</title>
+  <meta name="description" content="Create your free PixelMind AI account and get 5 free AI image generations. No credit card required." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-6);
+    }
+
+    .auth-wrapper {
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      z-index: 1;
+      animation: authIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes authIn {
+      from { opacity: 0; transform: translateY(30px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: var(--space-8);
+    }
+
+    .auth-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-3);
+      text-decoration: none;
+      margin-bottom: var(--space-6);
+    }
+
+    .auth-logo-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-lg);
+      background: var(--grad-primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .auth-logo-text {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      background: var(--grad-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .auth-title { font-size: var(--text-3xl); font-weight: 800; margin-bottom: var(--space-2); }
+    .auth-sub { color: var(--text-secondary); font-size: var(--text-sm); }
+
+    .auth-card { padding: var(--space-8); }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .auth-footer-text {
+      text-align: center;
+      margin-top: var(--space-6);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+    }
+
+    .auth-footer-text a {
+      color: var(--text-accent);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color var(--transition-fast);
+    }
+
+    .auth-footer-text a:hover { color: var(--primary-400); }
+
+    .show-password-toggle {
+      position: absolute;
+      right: var(--space-4);
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 0;
+      transition: color var(--transition-fast);
+    }
+
+    .show-password-toggle:hover { color: var(--text-secondary); }
+
+    /* Password strength meter */
+    .password-strength {
+      margin-top: var(--space-2);
+      display: none;
+    }
+
+    .password-strength.visible { display: block; }
+
+    .strength-bar {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-bottom: var(--space-1);
+    }
+
+    .strength-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      transition: width 0.3s ease, background 0.3s ease;
+    }
+
+    .strength-label { font-size: var(--text-xs); color: var(--text-muted); }
+
+    /* Free tier badge */
+    .free-badge {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-5);
+    }
+
+    .free-badge-icon { font-size: 22px; }
+
+    .free-badge-text {
+      font-size: var(--text-sm);
+      color: #34d399;
+      font-weight: 500;
+    }
+
+    .free-badge-text span {
+      display: block;
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+      text-decoration: none;
+      margin-bottom: var(--space-8);
+      transition: color var(--transition-fast);
+    }
+
+    .back-link:hover { color: var(--text-accent); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="page-bg" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<div class="auth-wrapper">
+  <a href="index.html" class="back-link" id="back-to-home">← Back to home</a>
+
+  <div class="auth-header">
+    <a href="index.html" class="auth-logo" id="auth-logo">
+      <div class="auth-logo-icon" aria-hidden="true">✦</div>
+      <span class="auth-logo-text">PixelMind AI</span>
+    </a>
+    <h1 class="auth-title">Create your account</h1>
+    <p class="auth-sub">Start generating AI images for free. No credit card needed.</p>
+  </div>
+
+  <div class="card auth-card">
+    <!-- Free tier highlight -->
+    <div class="free-badge" role="note" aria-label="Free plan details">
+      <div class="free-badge-icon">🎁</div>
+      <div class="free-badge-text">
+        Free plan includes 5 AI image generations
+        <span>Upgrade anytime for unlimited access</span>
+      </div>
+    </div>
+
+    <form class="auth-form" id="signup-form" novalidate autocomplete="on">
+      <!-- Name row -->
+      <div class="form-group">
+        <label class="form-label" for="fullname">Full Name</label>
+        <div class="input-wrapper">
+          <span class="input-icon" aria-hidden="true">👤</span>
+          <input
+            class="form-input"
+            type="text"
+            id="fullname"
+            name="fullname"
+            autocomplete="name"
+            placeholder="Your full name"
+            required
+            aria-required="true"
+          />
+        </div>
+        <span class="form-error" id="name-error" role="alert" aria-live="polite"></span>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label class="form-label" for="email">Email address</label>
+        <div class="input-wrapper">
+          <span class="input-icon" aria-hidden="true">✉</span>
+          <input
+            class="form-input"
+            type="email"
+            id="email"
+            name="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            required
+            aria-required="true"
+          />
+        </div>
+        <span class="form-error" id="email-error" role="alert" aria-live="polite"></span>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon" aria-hidden="true">🔒</span>
+          <input
+            class="form-input"
+            type="password"
+            id="password"
+            name="password"
+            autocomplete="new-password"
+            placeholder="Min. 8 characters"
+            required
+            aria-required="true"
+            aria-describedby="password-strength-label"
+          />
+          <button type="button" class="show-password-toggle" id="toggle-password" aria-label="Toggle password visibility">👁</button>
+        </div>
+        <div class="password-strength" id="password-strength">
+          <div class="strength-bar">
+            <div class="strength-fill" id="strength-fill"></div>
+          </div>
+          <span class="strength-label" id="password-strength-label"></span>
+        </div>
+        <span class="form-error" id="password-error" role="alert" aria-live="polite"></span>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group">
+        <label class="form-label" for="confirm-password">Confirm Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon" aria-hidden="true">🔒</span>
+          <input
+            class="form-input"
+            type="password"
+            id="confirm-password"
+            name="confirm-password"
+            autocomplete="new-password"
+            placeholder="Re-enter your password"
+            required
+            aria-required="true"
+          />
+        </div>
+        <span class="form-error" id="confirm-error" role="alert" aria-live="polite"></span>
+      </div>
+
+      <!-- Terms checkbox -->
+      <div style="display:flex; align-items:flex-start; gap:var(--space-3);">
+        <input type="checkbox" id="terms" name="terms" style="margin-top:3px; accent-color:var(--primary-500); width:16px;height:16px; cursor:pointer;" required aria-required="true">
+        <label for="terms" style="font-size:var(--text-xs); color:var(--text-secondary); cursor:pointer; line-height:1.6;">
+          I agree to the <a href="#" style="color:var(--text-accent); text-decoration:none;" id="tos-link">Terms of Service</a>
+          and <a href="#" style="color:var(--text-accent); text-decoration:none;" id="privacy-link">Privacy Policy</a>
+        </label>
+      </div>
+      <span class="form-error" id="terms-error" role="alert" aria-live="polite"></span>
+
+      <!-- Submit -->
+      <button type="submit" class="btn btn-primary btn-lg w-full" id="signup-btn" style="margin-top:var(--space-2);">
+        <span class="btn-label">Create Free Account ✦</span>
+      </button>
+    </form>
+
+    <div class="divider-text">already a member?</div>
+
+    <a href="login.html" class="btn btn-ghost w-full" id="goto-login">
+      Log In →
+    </a>
+  </div>
+
+  <p class="auth-footer-text">
+    Your data is safe. We never share it with third parties.
+  </p>
+</div>
+
+<div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<script src="js/auth.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    authRedirectIfLoggedIn();
+
+    const form          = document.getElementById('signup-form');
+    const signupBtn     = document.getElementById('signup-btn');
+    const nameInput     = document.getElementById('fullname');
+    const emailInput    = document.getElementById('email');
+    const passInput     = document.getElementById('password');
+    const confirmInput  = document.getElementById('confirm-password');
+    const termsInput    = document.getElementById('terms');
+    const togglePass    = document.getElementById('toggle-password');
+    const strengthBar   = document.getElementById('password-strength');
+    const strengthFill  = document.getElementById('strength-fill');
+    const strengthLabel = document.getElementById('password-strength-label');
+    const toasts        = document.getElementById('toast-container');
+
+    // Password toggle
+    togglePass.addEventListener('click', () => {
+      const isText = passInput.type === 'text';
+      passInput.type = isText ? 'password' : 'text';
+      togglePass.textContent = isText ? '👁' : '🙈';
+    });
+
+    // Password strength checker
+    passInput.addEventListener('input', () => {
+      const val = passInput.value;
+      passInput.classList.remove('error');
+      document.getElementById('password-error').textContent = '';
+
+      if (val.length === 0) { strengthBar.classList.remove('visible'); return; }
+      strengthBar.classList.add('visible');
+
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^a-zA-Z0-9]/.test(val)) score++;
+
+      const levels = [
+        { w: '25%',  bg: '#ef4444', label: 'Weak' },
+        { w: '50%',  bg: '#f59e0b', label: 'Fair' },
+        { w: '75%',  bg: '#3b82f6', label: 'Good' },
+        { w: '100%', bg: '#10b981', label: 'Strong' },
+      ];
+      const lvl = levels[Math.max(0, score - 1)];
+      strengthFill.style.width      = lvl.w;
+      strengthFill.style.background = lvl.bg;
+      strengthLabel.textContent     = `Password strength: ${lvl.label}`;
+    });
+
+    // Clear errors on input
+    [nameInput, emailInput, passInput, confirmInput].forEach(el => {
+      el.addEventListener('input', () => {
+        el.classList.remove('error');
+      });
+    });
+
+    // Toast
+    function showToast(msg, type) {
+      const icons = { success: '✅', error: '❌', warn: '⚠️' };
+      const t = document.createElement('div');
+      t.className = `toast toast-${type}`;
+      t.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+      toasts.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateX(60px)';
+        t.style.transition = 'all 0.3s ease';
+        setTimeout(() => t.remove(), 300);
+      }, 3500);
+    }
+
+    // Validation
+    function validate() {
+      let valid = true;
+      const name    = nameInput.value.trim();
+      const email   = emailInput.value.trim();
+      const pass    = passInput.value;
+      const confirm = confirmInput.value;
+      const terms   = termsInput.checked;
+
+      if (!name || name.length < 2) {
+        nameInput.classList.add('error');
+        document.getElementById('name-error').textContent = '⚠ Please enter your full name.';
+        valid = false;
+      }
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        emailInput.classList.add('error');
+        document.getElementById('email-error').textContent = '⚠ Please enter a valid email address.';
+        valid = false;
+      }
+
+      if (!pass || pass.length < 8) {
+        passInput.classList.add('error');
+        document.getElementById('password-error').textContent = '⚠ Password must be at least 8 characters.';
+        valid = false;
+      }
+
+      if (pass !== confirm) {
+        confirmInput.classList.add('error');
+        document.getElementById('confirm-error').textContent = '⚠ Passwords do not match.';
+        valid = false;
+      }
+
+      if (!terms) {
+        document.getElementById('terms-error').textContent = '⚠ You must agree to the Terms & Privacy Policy.';
+        valid = false;
+      } else {
+        document.getElementById('terms-error').textContent = '';
+      }
+
+      return valid;
+    }
+
+    // Submit
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validate()) return;
+
+      signupBtn.classList.add('btn-loading');
+      signupBtn.disabled = true;
+
+      await new Promise(r => setTimeout(r, 900));
+
+      const result = authSignup(
+        nameInput.value.trim(),
+        emailInput.value.trim(),
+        passInput.value
+      );
+
+      signupBtn.classList.remove('btn-loading');
+      signupBtn.disabled = false;
+
+      if (result.success) {
+        showToast('Account created! Redirecting to login…', 'success');
+        signupBtn.querySelector('.btn-label').textContent = '✓ Account Created!';
+        signupBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+      } else {
+        emailInput.classList.add('error');
+        document.getElementById('email-error').textContent = '⚠ ' + result.message;
+        showToast(result.message, 'error');
+      }
+    });
+  });
+</script>
+</body>
+</html>

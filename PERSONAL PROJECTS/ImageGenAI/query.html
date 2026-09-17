@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generate Images — PixelMind AI</title>
+  <meta name="description" content="Generate stunning AI images with PixelMind AI. Enter your prompt and watch the magic happen." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── App Layout ── */
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      background: rgba(5,5,16,0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      padding: var(--space-6) 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: 0 var(--space-5) var(--space-6);
+      border-bottom: 1px solid var(--glass-border);
+      text-decoration: none;
+      margin-bottom: var(--space-4);
+    }
+
+    .sidebar-logo-icon {
+      width: 34px; height: 34px;
+      border-radius: var(--radius-md);
+      background: var(--grad-primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      box-shadow: var(--shadow-glow);
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo-text {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      background: var(--grad-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 0 var(--space-3);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all var(--transition-fast);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-family: var(--font-family);
+      width: 100%;
+      text-align: left;
+    }
+
+    .sidebar-item:hover {
+      background: var(--glass-hover);
+      color: var(--text-primary);
+    }
+
+    .sidebar-item.active {
+      background: rgba(124,58,237,0.12);
+      color: var(--primary-400);
+      border: 1px solid rgba(124,58,237,0.2);
+    }
+
+    .sidebar-item-icon { font-size: 18px; width: 22px; text-align: center; flex-shrink: 0; }
+
+    .sidebar-section-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: var(--space-4) var(--space-4) var(--space-2);
+    }
+
+    .sidebar-bottom {
+      padding: var(--space-4) var(--space-3) 0;
+      border-top: 1px solid var(--glass-border);
+      margin-top: var(--space-4);
+    }
+
+    /* Usage panel in sidebar */
+    .usage-panel {
+      padding: var(--space-4);
+      background: rgba(124,58,237,0.06);
+      border: 1px solid rgba(124,58,237,0.15);
+      border-radius: var(--radius-lg);
+      margin: var(--space-4) var(--space-3) 0;
+    }
+
+    .usage-panel-title {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--space-3);
+    }
+
+    .usage-panel-count {
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      margin-bottom: var(--space-2);
+    }
+
+    .usage-panel-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-bottom: var(--space-2);
+    }
+
+    .usage-panel-fill {
+      height: 100%;
+      background: var(--grad-primary);
+      border-radius: var(--radius-full);
+      transition: width var(--transition-slow);
+    }
+
+    .usage-panel-fill.danger {
+      background: linear-gradient(90deg, #f59e0b, #ef4444);
+    }
+
+    .usage-panel-sub {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    /* User profile in sidebar */
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      transition: background var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .user-profile:hover { background: var(--glass-hover); }
+
+    .user-profile-info {
+      flex: 1;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .user-profile-name {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-profile-email {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Main Content ── */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow-y: auto;
+    }
+
+    .main-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: var(--space-4) var(--space-6);
+      background: rgba(5,5,16,0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+    }
+
+    .topbar-title {
+      font-size: var(--text-xl);
+      font-weight: 700;
+    }
+
+    .topbar-title span { color: var(--text-muted); font-weight: 400; font-size: var(--text-base); }
+
+    /* ── Prompt Area ── */
+    .prompt-area {
+      padding: var(--space-8) var(--space-8) var(--space-6);
+      border-bottom: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.01);
+    }
+
+    .prompt-label {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      margin-bottom: var(--space-2);
+    }
+
+    .prompt-hint {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      margin-bottom: var(--space-5);
+      line-height: 1.5;
+    }
+
+    .prompt-input-wrapper {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      transition: all var(--transition-base);
+      overflow: hidden;
+    }
+
+    .prompt-input-wrapper:focus-within {
+      border-color: var(--primary-500);
+      background: rgba(124,58,237,0.05);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+    }
+
+    .prompt-textarea {
+      width: 100%;
+      padding: var(--space-5) var(--space-5) var(--space-3);
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      font-size: var(--text-base);
+      resize: none;
+      min-height: 80px;
+      line-height: 1.6;
+    }
+
+    .prompt-textarea::placeholder { color: var(--text-muted); }
+
+    .prompt-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-3) var(--space-5) var(--space-4);
+      gap: var(--space-4);
+    }
+
+    .prompt-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .char-count {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    /* Example prompts */
+    .example-prompts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-top: var(--space-4);
+    }
+
+    .example-chip {
+      padding: var(--space-2) var(--space-3);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .example-chip:hover {
+      background: rgba(124,58,237,0.1);
+      border-color: rgba(124,58,237,0.4);
+      color: var(--text-accent);
+    }
+
+    /* ── Gallery Area ── */
+    .gallery-area {
+      flex: 1;
+      padding: var(--space-8);
+    }
+
+    .gallery-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-6);
+    }
+
+    .gallery-title {
+      font-size: var(--text-xl);
+      font-weight: 700;
+    }
+
+    .gallery-count {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+    }
+
+    /* ── Limit Modal Customization ── */
+    .limit-modal-icon {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(239,68,68,0.15));
+      border: 2px solid rgba(245,158,11,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px;
+      margin: 0 auto var(--space-6);
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.3); }
+      50%       { box-shadow: 0 0 0 16px rgba(245,158,11,0); }
+    }
+
+    .limit-modal-title {
+      font-size: var(--text-3xl);
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: var(--space-3);
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .limit-modal-sub {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+      line-height: 1.7;
+      margin-bottom: var(--space-8);
+    }
+
+    .limit-usage-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-8);
+    }
+
+    .limit-usage-circles {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .usage-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      border: 2px solid rgba(245,158,11,0.4);
+      box-shadow: 0 0 8px rgba(245,158,11,0.4);
+    }
+
+    .usage-dot.empty {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.12);
+      box-shadow: none;
+    }
+
+    .limit-usage-text {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: #fbbf24;
+    }
+
+    .limit-modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    /* ── Mobile sidebar toggle ── */
+    .sidebar-toggle {
+      display: none;
+      background: none;
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      padding: var(--space-2) var(--space-3);
+      cursor: pointer;
+      font-size: 18px;
+      transition: all var(--transition-fast);
+    }
+
+    .sidebar-toggle:hover { background: var(--glass-hover); color: var(--text-primary); }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .sidebar.open { display: flex; position: fixed; z-index: 200; left: 0; top: 0; height: 100vh; }
+      .sidebar-toggle { display: flex; }
+      .prompt-area, .gallery-area { padding: var(--space-5) var(--space-4); }
+      .main-topbar { padding: var(--space-3) var(--space-4); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="page-bg" aria-hidden="true">
+  <div class="blob blob-1" style="opacity:0.2;"></div>
+  <div class="blob blob-2" style="opacity:0.15;"></div>
+</div>
+
+<!-- App Layout -->
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="App sidebar">
+    <a href="index.html" class="sidebar-logo" id="sidebar-logo">
+      <div class="sidebar-logo-icon" aria-hidden="true">✦</div>
+      <span class="sidebar-logo-text">PixelMind AI</span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Menu</span>
+      <a href="query.html" class="sidebar-item active" id="nav-generate">
+        <span class="sidebar-item-icon" aria-hidden="true">✨</span>
+        Generate
+      </a>
+      <button class="sidebar-item" id="nav-gallery-btn">
+        <span class="sidebar-item-icon" aria-hidden="true">🖼️</span>
+        My Gallery
+      </button>
+      <a href="index.html" class="sidebar-item" id="nav-home">
+        <span class="sidebar-item-icon" aria-hidden="true">🏠</span>
+        Home
+      </a>
+    </nav>
+
+    <!-- Usage Panel -->
+    <div class="usage-panel" id="sidebar-usage-panel" aria-label="Usage stats">
+      <div class="usage-panel-title">Free Plan Usage</div>
+      <div class="usage-panel-count">
+        <span id="usage-count" class="gradient-text">0</span>
+        <span style="font-size:var(--text-base); color:var(--text-muted);">/ 5</span>
+      </div>
+      <div class="usage-panel-bar">
+        <div class="usage-panel-fill" id="usage-panel-fill" style="width:0%;"></div>
+      </div>
+      <div class="usage-panel-sub" id="usage-remaining">5 images remaining</div>
+      <button class="btn btn-primary btn-sm w-full" style="margin-top:var(--space-3);" id="upgrade-btn-sidebar">
+        ⚡ Upgrade to Pro
+      </button>
+    </div>
+
+    <!-- User Profile -->
+    <div class="sidebar-bottom">
+      <div class="user-profile" id="user-profile-btn" role="button" tabindex="0" aria-label="User menu">
+        <div class="avatar" id="user-avatar" aria-hidden="true">U</div>
+        <div class="user-profile-info">
+          <div class="user-profile-name" id="user-name">User Name</div>
+          <div class="user-profile-email" id="user-email">user@example.com</div>
+        </div>
+        <span style="color:var(--text-muted); font-size:12px;">⋮</span>
+      </div>
+      <button class="sidebar-item" id="logout-btn" style="margin-top:var(--space-2); color:#f87171;" aria-label="Log out">
+        <span class="sidebar-item-icon" aria-hidden="true">🚪</span>
+        Log Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content" id="main-content" role="main">
+
+    <!-- Top Bar -->
+    <header class="main-topbar" role="banner">
+      <div style="display:flex; align-items:center; gap:var(--space-4);">
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar" aria-expanded="false">☰</button>
+        <div>
+          <div class="topbar-title">Image Generator <span>— Free Plan</span></div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:var(--space-3);">
+        <div class="usage-counter" id="nav-usage-counter" role="status" aria-label="Usage counter">
+          <span style="font-size:16px;" aria-hidden="true">🎨</span>
+          <span id="nav-usage-text">0 / 5 images</span>
+          <div class="usage-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div class="usage-bar-fill" id="nav-usage-bar" style="width:0%;"></div>
+          </div>
+        </div>
+        <div class="avatar" id="topbar-avatar" aria-label="User avatar">U</div>
+      </div>
+    </header>
+
+    <!-- Prompt Section -->
+    <section class="prompt-area" aria-label="Image generation prompt">
+      <h1 class="prompt-label">What would you like to create?</h1>
+      <p class="prompt-hint">
+        Describe your image in detail for the best results.
+        Press <kbd style="background:rgba(255,255,255,0.08); border-radius:4px; padding:1px 5px; font-size:11px;">Ctrl+Enter</kbd> to generate.
+      </p>
+
+      <div class="prompt-input-wrapper">
+        <textarea
+          class="prompt-textarea"
+          id="prompt-input"
+          placeholder="e.g. A majestic dragon soaring over a neon-lit cyberpunk city at night, ultra-detailed, 8K quality, dramatic lighting..."
+          maxlength="500"
+          aria-label="Image generation prompt"
+          aria-required="true"
+          rows="3"
+        ></textarea>
+        <div class="prompt-footer">
+          <div class="prompt-meta">
+            <span class="char-count" id="char-count" aria-live="polite">0 / 500</span>
+            <span class="badge badge-purple" aria-label="Free plan">Free</span>
+          </div>
+          <button class="btn btn-primary" id="generate-btn" aria-label="Generate image">
+            <span class="btn-label">✨ Generate Image</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Example prompts -->
+      <div style="margin-top:var(--space-5);">
+        <p style="font-size:var(--text-xs); color:var(--text-muted); margin-bottom:var(--space-3); font-weight:600; text-transform:uppercase; letter-spacing:0.06em;">
+          ✨ Try these prompts
+        </p>
+        <div class="example-prompts" id="example-prompts" role="list" aria-label="Example prompts">
+          <button class="example-chip" role="listitem">🌌 Nebula galaxy with stars</button>
+          <button class="example-chip" role="listitem">🐉 Futuristic dragon in neon city</button>
+          <button class="example-chip" role="listitem">🌊 Serene Japanese garden at dawn</button>
+          <button class="example-chip" role="listitem">🤖 Cyberpunk robot portrait</button>
+          <button class="example-chip" role="listitem">🏔️ Mystical mountain landscape</button>
+          <button class="example-chip" role="listitem">🦋 Ethereal fairy in an enchanted forest</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery-area" aria-label="Generated images gallery">
+      <div class="gallery-header">
+        <h2 class="gallery-title">Your Creations</h2>
+        <span class="gallery-count" id="gallery-count" aria-live="polite">0 images</span>
+      </div>
+
+      <!-- Image grid -->
+      <div class="image-grid" id="gallery" aria-live="polite" aria-label="Generated images"></div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-state" aria-label="Empty gallery">
+        <div class="empty-state-icon" aria-hidden="true">🎨</div>
+        <div class="empty-state-title">Your canvas is empty</div>
+        <p class="empty-state-desc">Enter a prompt above and click Generate to create your first AI masterpiece.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══ LIMIT REACHED MODAL ═══ -->
+<div class="modal-overlay hidden" id="limit-modal" role="dialog" aria-modal="true" aria-labelledby="limit-title" aria-describedby="limit-desc">
+  <div class="modal">
+    <div class="limit-modal-icon" aria-hidden="true">⚠️</div>
+
+    <h2 class="limit-modal-title" id="limit-title">LIMIT REACHED</h2>
+
+    <p class="limit-modal-sub" id="limit-desc">
+      You've used all <strong>5 free image generations</strong> on your Free plan.
+      Upgrade to Pro for unlimited AI image creation.
+    </p>
+
+    <!-- Usage dots visualization -->
+    <div class="limit-usage-display" role="status" aria-label="5 out of 5 images used">
+      <div class="limit-usage-circles" aria-hidden="true">
+        <div class="usage-dot"></div>
+        <div class="usage-dot"></div>
+        <div class="usage-dot"></div>
+        <div class="usage-dot"></div>
+        <div class="usage-dot"></div>
+      </div>
+      <div class="limit-usage-text">5 / 5 images used</div>
+    </div>
+
+    <div class="limit-modal-actions">
+      <a href="index.html#pricing" class="btn btn-primary btn-lg w-full" id="upgrade-cta-btn">
+        ⚡ Upgrade to Pro — $9/month
+      </a>
+      <button class="btn btn-ghost w-full" id="close-limit-modal">
+        Maybe later
+      </button>
+    </div>
+
+    <!-- Pro features reminder -->
+    <div style="margin-top:var(--space-6); padding-top:var(--space-6); border-top:1px solid var(--glass-border);">
+      <p style="font-size:var(--text-xs); color:var(--text-muted); text-align:center; margin-bottom:var(--space-3); font-weight:600; text-transform:uppercase; letter-spacing:0.06em;">
+        Pro includes
+      </p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-2);">
+        <div style="font-size:var(--text-xs); color:var(--text-secondary); display:flex; gap:var(--space-2);">
+          <span style="color:#34d399;">✓</span> Unlimited generations
+        </div>
+        <div style="font-size:var(--text-xs); color:var(--text-secondary); display:flex; gap:var(--space-2);">
+          <span style="color:#34d399;">✓</span> HD 1024×1024
+        </div>
+        <div style="font-size:var(--text-xs); color:var(--text-secondary); display:flex; gap:var(--space-2);">
+          <span style="color:#34d399;">✓</span> API access
+        </div>
+        <div style="font-size:var(--text-xs); color:var(--text-secondary); display:flex; gap:var(--space-2);">
+          <span style="color:#34d399;">✓</span> Priority queue
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Scripts (order matters: auth → limits → query) -->
+<script src="js/auth.js"></script>
+<script src="js/limits.js"></script>
+<script src="js/query.js"></script>
+
+<script>
+  // Additional UI wiring not in query.js
+  document.addEventListener('DOMContentLoaded', () => {
+    // Sidebar toggle (mobile)
+    const sidebar       = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      const expanded = sidebar.classList.contains('open');
+      sidebarToggle.setAttribute('aria-expanded', expanded);
+    });
+
+    // Close sidebar on outside click (mobile)
+    document.addEventListener('click', (e) => {
+      if (sidebar.classList.contains('open') &&
+          !sidebar.contains(e.target) &&
+          e.target !== sidebarToggle) {
+        sidebar.classList.remove('open');
+        sidebarToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Example prompt chips
+    document.getElementById('example-prompts').addEventListener('click', (e) => {
+      const chip = e.target.closest('.example-chip');
+      if (!chip) return;
+      const promptInput = document.getElementById('prompt-input');
+      const promptMap = {
+        '🌌 Nebula galaxy with stars':         'A breathtaking nebula galaxy with vibrant swirling colors, countless glittering stars, and cosmic dust clouds, ultra-detailed, 8K, space photography',
+        '🐉 Futuristic dragon in neon city':   'A majestic dragon with iridescent scales soaring over a neon-lit cyberpunk city at night, rain-soaked streets reflecting colorful lights, ultra-detailed, 8K',
+        '🌊 Serene Japanese garden at dawn':   'A serene Japanese zen garden at golden dawn, cherry blossom petals falling, koi pond with reflections, misty mountains in the background, oil painting style',
+        '🤖 Cyberpunk robot portrait':         'A detailed portrait of a sleek cyberpunk robot with glowing blue eyes, chrome plating, neon circuitry, dark moody background, studio lighting, hyperrealistic',
+        '🏔️ Mystical mountain landscape':     'Towering mystical mountains shrouded in ethereal mist, glowing ancient ruins, magical aurora borealis sky, fantasy art, ultra-detailed, cinematic',
+        '🦋 Ethereal fairy in an enchanted forest': 'A beautiful ethereal fairy with luminescent wings standing in an enchanted forest, bioluminescent flowers, magical sparkles, fantasy digital art, 8K quality',
+      };
+      const text = promptMap[chip.textContent.trim()] || chip.textContent.replace(/^[^\s]+\s/, '');
+      promptInput.value = text;
+      promptInput.dispatchEvent(new Event('input'));
+      promptInput.focus();
+    });
+
+    // Gallery count updater
+    const galleryEl   = document.getElementById('gallery');
+    const galleryCount = document.getElementById('gallery-count');
+
+    const observer = new MutationObserver(() => {
+      const count = galleryEl.querySelectorAll('.image-card').length;
+      galleryCount.textContent = `${count} image${count !== 1 ? 's' : ''}`;
+    });
+    observer.observe(galleryEl, { childList: true });
+
+    // Sidebar usage updater (mirror of main usage)
+    function syncSidebarUsage() {
+      const count     = limitsGetCount();
+      const remaining = limitsGetRemaining();
+      const pct       = limitsGetUsagePercent();
+      const reached   = limitsIsReached();
+
+      document.getElementById('usage-count').textContent = count;
+      const fill = document.getElementById('usage-panel-fill');
+      fill.style.width = `${Math.min(pct, 100)}%`;
+      fill.classList.toggle('danger', pct >= 80);
+
+      const remEl = document.getElementById('usage-remaining');
+      if (reached) {
+        remEl.textContent = '⚠️ Limit reached — upgrade for more!';
+        remEl.style.color = '#f87171';
+      } else {
+        remEl.textContent = `${remaining} image${remaining !== 1 ? 's' : ''} remaining`;
+        remEl.style.color = '';
+      }
+    }
+
+    syncSidebarUsage();
+
+    // Re-sync sidebar after generation (listen for changes)
+    const origIncrement = window.limitsIncrement;
+    window.origLimitsIncrement = limitsIncrement;
+
+    // Also update topbar avatar after init
+    const session = authGetSession();
+    if (session) {
+      document.getElementById('topbar-avatar').textContent = session.name.charAt(0).toUpperCase();
+    }
+
+    // Upgrade button in sidebar
+    document.getElementById('upgrade-btn-sidebar').addEventListener('click', () => {
+      window.location.href = 'index.html#pricing';
+    });
+
+    // Gallery scroll button
+    document.getElementById('nav-gallery-btn').addEventListener('click', () => {
+      document.getElementById('gallery').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    // Periodically sync sidebar usage (after generate events update counts)
+    setInterval(syncSidebarUsage, 1000);
+  });
+</script>
+</body>
+</html>
