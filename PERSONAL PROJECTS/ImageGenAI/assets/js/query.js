@@ -1,49 +1,80 @@
 /* =====================================================
    IMAGE GENERATIVE AI — Query Page Logic
-   Handles prompt submission, mock image generation,
-   usage limit enforcement, and gallery rendering.
+   Connected to Cloudflare Worker backend for real AI
+   image generation via Workers AI (Flux / SDXL).
+   Worker URL: https://pixelmind-ai-worker.ahana13-ad.workers.dev
+   Images saved to Supabase DB (images table).
    ===================================================== */
 
-// ── DOM References ────────────────────────────────────
-const promptInput      = document.getElementById('prompt-input');
-const generateBtn      = document.getElementById('generate-btn');
-const gallery          = document.getElementById('gallery');
-const emptyState       = document.getElementById('empty-state');
-const limitModal       = document.getElementById('limit-modal');
-const usageText        = document.getElementById('usage-text');
-const usageBarFill     = document.getElementById('usage-bar-fill');
-const navUsageText     = document.getElementById('nav-usage-text');
-const navUsageBar      = document.getElementById('nav-usage-bar');
-const charCount        = document.getElementById('char-count');
-const toastContainer   = document.getElementById('toast-container');
-const userNameEl       = document.getElementById('user-name');
-const userAvatarEl     = document.getElementById('user-avatar');
-const userEmailEl      = document.getElementById('user-email');
-const logoutBtn        = document.getElementById('logout-btn');
+// ── Worker API Config ────────────────────────────────
+const WORKER_BASE_URL = 'https://pixelmind-ai-worker.ahana13-ad.workers.dev';
+const API_GENERATE    = `${WORKER_BASE_URL}/api/generate`;
+const API_HEALTH      = `${WORKER_BASE_URL}/api/health`;
+const DEFAULT_MODEL   = 'flux-schnell';
 
-// ── Picsum seeds for "generating" different images ───
-// We use prompt-derived numbers so the same prompt → same result (deterministic)
-function promptToSeed(prompt) {
-  let hash = 0;
-  for (let i = 0; i < prompt.length; i++) {
-    hash = ((hash << 5) - hash) + prompt.charCodeAt(i);
-    hash |= 0;
+// ── Save image to Supabase ────────────────────────────
+async function gallerySave(imageUrl, prompt, model) {
+  const sb      = await getSupabase();
+  const session = authGetSession();
+  if (!sb || !session) return null;
+
+  const entry = {
+    user_id:   session.user.id,
+    prompt,
+    image_url: imageUrl,
+    model:     model || DEFAULT_MODEL,
+  };
+
+  const { data, error } = await sb.from('images').insert(entry).select().single();
+  if (error) {
+    console.error('[gallerySave] Supabase insert error:', error.message);
+    return null;
   }
-  // Use absolute value and add a random offset so repeated same prompts vary
-  return (Math.abs(hash) + Date.now()) % 1000;
+  return data;
 }
 
-// ── Image URL generators (uses picsum as stand-in) ──
-const IMAGE_STYLES = [
-  (seed) => `https://picsum.photos/seed/${seed}/512/512`,
-  (seed) => `https://picsum.photos/seed/${seed + 100}/512/512`,
-  (seed) => `https://picsum.photos/seed/${seed + 200}/512/512`,
-];
+// ── Load images from Supabase ─────────────────────────
+async function galleryLoad() {
+  const sb      = await getSupabase();
+  const session = authGetSession();
+  if (!sb || !session) return [];
 
-function getMockImageUrl(prompt) {
-  const seed  = promptToSeed(prompt);
-  const style = IMAGE_STYLES[seed % IMAGE_STYLES.length];
-  return style(seed);
+  const { data, error } = await sb
+    .from('images')
+    .select('*')
+    .eq('user_id', session.user.id)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    console.error('[galleryLoad] Supabase select error:', error.message);
+    return [];
+  }
+  return data || [];
+}
+
+// ── DOM References ───────────────────────────────────
+const promptInput    = document.getElementById('prompt-input');
+const generateBtn    = document.getElementById('generate-btn');
+const charCount      = document.getElementById('char-count');
+const toastContainer = document.getElementById('toast-container');
+const userNameEl     = document.getElementById('user-name');
+const userAvatarEl   = document.getElementById('user-avatar');
+const userEmailEl    = document.getElementById('user-email');
+const logoutBtn      = document.getElementById('logout-btn');
+const limitModal     = document.getElementById('limit-modal');
+const navUsageText   = document.getElementById('nav-usage-text');
+const navUsageBar    = document.getElementById('nav-usage-bar');
+
+// ── Worker health check ──────────────────────────────
+async function checkWorkerHealth() {
+  try {
+    const res = await fetch(API_HEALTH, { method: 'GET', signal: AbortSignal.timeout(5000) });
+    const data = await res.json();
+    return data.status === 'ok';
+  } catch {
+    return false;
+  }
 }
 
 // ── Toast ────────────────────────────────────────────
@@ -58,27 +89,24 @@ function showToast(message, type = 'success') {
     toast.style.transform = 'translateX(60px)';
     toast.style.transition = 'all 0.3s ease';
     setTimeout(() => toast.remove(), 300);
-  }, 3500);
+  }, 4000);
 }
 
 // ── Update usage UI ──────────────────────────────────
 function updateUsageUI() {
-  const count   = limitsGetCount();
-  const max     = limitsGetMax();
-  const pct     = limitsGetUsagePercent();
-  const reached = limitsIsReached();
-
+  const count      = limitsGetCount();
+  const max        = limitsGetMax();
+  const pct        = limitsGetUsagePercent();
+  const reached    = limitsIsReached();
   const displayMax = max === Infinity ? '∞' : max;
-  const label = `${count} / ${displayMax} images`;
+  const label      = `${count} / ${displayMax} images`;
 
-  if (usageText)    usageText.textContent    = label;
   if (navUsageText) navUsageText.textContent = label;
 
-  [usageBarFill, navUsageBar].forEach(bar => {
-    if (!bar) return;
-    bar.style.width = `${Math.min(pct, 100)}%`;
-    bar.classList.toggle('danger', pct >= 80);
-  });
+  if (navUsageBar) {
+    navUsageBar.style.width = `${Math.min(pct, 100)}%`;
+    navUsageBar.classList.toggle('danger', pct >= 80);
+  }
 
   if (generateBtn) {
     generateBtn.disabled = reached;
@@ -87,53 +115,15 @@ function updateUsageUI() {
   }
 }
 
-// ── Skeleton card ────────────────────────────────────
-function createSkeletonCard() {
-  const div = document.createElement('div');
-  div.className = 'image-card';
-  div.id = 'skeleton-card';
-  div.innerHTML = `
-    <div class="skeleton" style="width:100%; aspect-ratio:1;"></div>
-    <div class="image-card-body" style="display:flex;flex-direction:column;gap:8px;">
-      <div class="skeleton" style="height:12px; width:90%;"></div>
-      <div class="skeleton" style="height:12px; width:60%;"></div>
-      <div class="skeleton" style="height:30px; width:80%; margin-top:4px;"></div>
-    </div>`;
-  return div;
+// ── Skeleton while generating ────────────────────────
+function showGeneratingSkeleton() {
+  const wrapper = document.getElementById('generating-indicator');
+  if (wrapper) wrapper.style.display = 'flex';
 }
 
-// ── Render generated image card ───────────────────────
-function createImageCard(imageUrl, prompt) {
-  const div = document.createElement('div');
-  div.className = 'image-card';
-  div.innerHTML = `
-    <div style="position:relative; overflow:hidden;">
-      <img class="image-card-img" src="${imageUrl}" alt="Generated: ${prompt}"
-           loading="lazy" onerror="this.src='https://picsum.photos/seed/42/512/512'">
-      <div style="position:absolute;top:8px;right:8px;">
-        <span class="badge badge-purple" style="font-size:9px;">AI Generated</span>
-      </div>
-    </div>
-    <div class="image-card-body">
-      <p class="image-card-prompt" title="${prompt}">${prompt}</p>
-      <div class="image-card-actions">
-        <a href="${imageUrl}" download="ai-image.jpg" target="_blank"
-           class="btn btn-outline btn-sm" style="flex:1; text-align:center;">
-          ⬇ Download
-        </a>
-        <button class="btn btn-ghost btn-sm" onclick="copyPrompt(this, '${prompt.replace(/'/g, "\\'")}')">
-          📋
-        </button>
-      </div>
-    </div>`;
-  return div;
-}
-
-function copyPrompt(btn, prompt) {
-  navigator.clipboard.writeText(prompt).then(() => {
-    btn.textContent = '✅';
-    setTimeout(() => { btn.textContent = '📋'; }, 1500);
-  });
+function hideGeneratingSkeleton() {
+  const wrapper = document.getElementById('generating-indicator');
+  if (wrapper) wrapper.style.display = 'none';
 }
 
 // ── Main generate function ────────────────────────────
@@ -150,104 +140,137 @@ async function generateImage() {
     return;
   }
 
-  // UI loading state
+  // UI: loading
   generateBtn.classList.add('btn-loading');
   generateBtn.disabled = true;
   promptInput.disabled = true;
+  showGeneratingSkeleton();
 
-  // Show skeleton
-  if (emptyState) emptyState.style.display = 'none';
-  const skeleton = createSkeletonCard();
-  gallery.prepend(skeleton);
+  try {
+    showToast('Sending to AI… this may take a few seconds ⚡', 'info');
 
-  // Simulate AI generation delay (2–3 seconds)
-  const delay = 2000 + Math.random() * 1000;
-  await new Promise(resolve => setTimeout(resolve, delay));
+    const response = await fetch(API_GENERATE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, model: DEFAULT_MODEL }),
+      signal: AbortSignal.timeout(60000),
+    });
 
-  // Get mock image URL
-  const imageUrl = getMockImageUrl(prompt);
+    const data = await response.json();
 
-  // Increment count
-  const newCount = limitsIncrement();
-  updateUsageUI();
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
 
-  // Remove skeleton & add real card
-  skeleton.remove();
-  const card = createImageCard(imageUrl, prompt);
-  gallery.prepend(card);
+    // Save image to Supabase DB
+    const saved = await gallerySave(data.image, prompt, data.model || DEFAULT_MODEL);
+    if (!saved) {
+      showToast('⚠ Image generated but could not be saved to gallery.', 'warn');
+    }
 
-  // Reset input
-  promptInput.value = '';
-  charCount.textContent = '0 / 500';
+    // Increment local usage cache & re-fetch accurate count from DB
+    limitsIncrementLocal();
+    await limitsRefreshCount();
+    updateUsageUI();
 
-  // Show feedback
-  showToast('Image generated successfully! 🎉', 'success');
+    // Reset input
+    promptInput.value = '';
+    charCount.textContent = '0 / 500';
 
-  // Restore buttons
-  generateBtn.classList.remove('btn-loading');
-  promptInput.disabled = false;
+    showToast('✨ Image generated & saved to your gallery!', 'success');
 
-  if (!limitsIsReached()) {
-    generateBtn.disabled = false;
+    // Highlight the gallery link button
+    const viewBtn = document.getElementById('view-gallery-btn');
+    if (viewBtn) {
+      const images = await galleryLoad();
+      viewBtn.style.background   = 'rgba(124,58,237,0.15)';
+      viewBtn.style.borderColor  = 'var(--primary-500)';
+      viewBtn.textContent        = `🖼️ View Gallery (${images.length} images) →`;
+      viewBtn.style.animation    = 'none';
+      requestAnimationFrame(() => {
+        viewBtn.style.transition = 'all 0.3s ease';
+        viewBtn.style.transform  = 'scale(1.04)';
+        setTimeout(() => { viewBtn.style.transform = ''; }, 300);
+      });
+    }
+
+    // Check if limit now reached
+    if (limitsIsReached()) {
+      setTimeout(showLimitModal, 800);
+    }
+
+  } catch (err) {
+    console.error('[generate] error:', err);
+    const msg = err.name === 'TimeoutError'
+      ? 'Generation timed out. The model may be busy — please try again.'
+      : `Generation failed: ${err.message}`;
+    showToast(msg, 'error');
+  } finally {
+    hideGeneratingSkeleton();
+    generateBtn.classList.remove('btn-loading');
+    promptInput.disabled = false;
+    if (!limitsIsReached()) generateBtn.disabled = false;
   }
-
-  // Check limit after generation
-  if (limitsIsReached()) {
-    setTimeout(showLimitModal, 800);
-  }
-
-  // Scroll gallery into view
-  gallery.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── Limit Modal ───────────────────────────────────────
 function showLimitModal() {
   if (limitModal) limitModal.classList.remove('hidden');
 }
-
 function hideLimitModal() {
   if (limitModal) limitModal.classList.add('hidden');
 }
 
 // ── Init page ─────────────────────────────────────────
-function initQueryPage() {
-  // Auth guard
-  if (!authRequire()) return;
+async function initQueryPage() {
+  // Auth guard — redirects to login.html if not logged in
+  const ok = await authRequire();
+  if (!ok) return;
 
-  const session = authGetSession();
+  const user = authGetUser();
 
-  // Populate user info
-  if (userNameEl)   userNameEl.textContent  = session.name;
-  if (userAvatarEl) userAvatarEl.textContent = session.name.charAt(0).toUpperCase();
-  if (userEmailEl)  userEmailEl.textContent  = session.email;
+  if (userNameEl)   userNameEl.textContent  = user.name;
+  if (userAvatarEl) userAvatarEl.textContent = user.name.charAt(0).toUpperCase();
+  if (userEmailEl)  userEmailEl.textContent  = user.email;
   if (logoutBtn)    logoutBtn.addEventListener('click', authLogout);
 
-  // Update usage UI
+  // Load usage count from DB
+  await limitsRefreshCount();
   updateUsageUI();
 
-  // Show limit modal on load if already hit limit
-  if (limitsIsReached()) {
-    setTimeout(showLimitModal, 500);
-  }
+  if (limitsIsReached()) setTimeout(showLimitModal, 500);
+
+  const closeBtn = document.getElementById('close-limit-modal');
+  if (closeBtn) closeBtn.addEventListener('click', hideLimitModal);
 
   // Char counter
   promptInput.addEventListener('input', () => {
     const len = promptInput.value.length;
     charCount.textContent = `${len} / 500`;
-    if (len > 450) charCount.style.color = 'var(--accent-pink)';
-    else charCount.style.color = 'var(--text-muted)';
+    charCount.style.color = len > 450 ? 'var(--accent-pink)' : 'var(--text-muted)';
   });
 
-  // Generate on Enter (Ctrl+Enter or Cmd+Enter)
+  // Ctrl+Enter to generate
   promptInput.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      generateImage();
-    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') generateImage();
   });
 
-  // Generate button
   generateBtn.addEventListener('click', generateImage);
+
+  // Update gallery button count on load
+  const viewBtn = document.getElementById('view-gallery-btn');
+  if (viewBtn) {
+    const images = await galleryLoad();
+    if (images.length > 0) {
+      viewBtn.textContent = `🖼️ View Gallery (${images.length} images) →`;
+    }
+  }
+
+  // Worker health check (non-blocking)
+  checkWorkerHealth().then(online => {
+    if (!online) showToast('⚠ AI backend unreachable — check Worker deployment.', 'warn');
+    else console.log('[pixelmind] Worker API is online ✅');
+  });
 }
 
-// Run on DOM ready
 document.addEventListener('DOMContentLoaded', initQueryPage);

@@ -1,84 +1,123 @@
 /* =====================================================
-   IMAGE GENERATIVE AI — Auth Helper
+   IMAGE GENERATIVE AI — Auth Helper (Supabase)
+   Replaces the old localStorage-based auth system.
+   Depends on: supabase.js (must be loaded first)
    ===================================================== */
 
-const AUTH_SESSION_KEY = 'iga_session';
-const AUTH_USERS_KEY   = 'iga_users';
+// ── In-memory session cache ───────────────────────────
+let _cachedSession = null;
 
-function _getUsers() {
-  try { return JSON.parse(localStorage.getItem(AUTH_USERS_KEY) || '[]'); }
-  catch { return []; }
-}
-
-function _saveUsers(users) {
-  localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(users));
-}
-
-function authSignup(name, email, password) {
+// ── Sign Up ──────────────────────────────────────────
+async function authSignup(name, email, password) {
   if (!name || !email || !password)
     return { success: false, message: 'All fields are required.' };
 
-  const users = _getUsers();
-  if (users.find(u => u.email.toLowerCase() === email.toLowerCase()))
-    return { success: false, message: 'An account with this email already exists.' };
+  const sb = await getSupabase();
+  if (!sb) return { success: false, message: 'Could not connect to the server. Try refreshing.' };
 
-  const user = {
-    id:        'u_' + Date.now(),
-    name:      name.trim(),
-    email:     email.toLowerCase().trim(),
-    password:  password,
-    plan:      'free',
-    createdAt: new Date().toISOString(),
-  };
-  users.push(user);
-  _saveUsers(users);
-  return { success: true };
+  const { data, error } = await sb.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { full_name: name.trim() },
+    },
+  });
+
+  if (error) {
+    // Friendly messages for common Supabase errors
+    if (error.message.includes('already registered') || error.message.includes('already exists'))
+      return { success: false, message: 'An account with this email already exists.' };
+    return { success: false, message: error.message };
+  }
+
+  // Some Supabase projects require email confirmation — handle gracefully
+  if (data.user && !data.session) {
+    return { success: true, requiresConfirmation: true };
+  }
+
+  _cachedSession = data.session;
+  return { success: true, requiresConfirmation: false };
 }
 
-function authLogin(email, password) {
+// ── Log In ───────────────────────────────────────────
+async function authLogin(email, password) {
   if (!email || !password)
     return { success: false, message: 'Email and password are required.' };
 
-  const users = _getUsers();
-  const user = users.find(
-    u => u.email.toLowerCase() === email.toLowerCase().trim() && u.password === password
-  );
-  if (!user)
-    return { success: false, message: 'Incorrect email or password. Please try again.' };
+  const sb = await getSupabase();
+  if (!sb) return { success: false, message: 'Could not connect to the server. Try refreshing.' };
 
-  const session = {
-    userId:  user.id,
-    name:    user.name,
-    email:   user.email,
-    plan:    user.plan,
-    loginAt: new Date().toISOString(),
-  };
-  localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    if (error.message.includes('Invalid login') || error.message.includes('invalid_credentials'))
+      return { success: false, message: 'Incorrect email or password. Please try again.' };
+    return { success: false, message: error.message };
+  }
+
+  _cachedSession = data.session;
   return { success: true };
 }
 
-function authLogout() {
-  localStorage.removeItem(AUTH_SESSION_KEY);
+// ── Log Out ──────────────────────────────────────────
+async function authLogout() {
+  const sb = await getSupabase();
+  if (sb) await sb.auth.signOut();
+  _cachedSession = null;
   window.location.href = 'login.html';
 }
 
+// ── Get current Supabase session ─────────────────────
+async function authGetSessionAsync() {
+  if (_cachedSession) return _cachedSession;
+  const sb = await getSupabase();
+  if (!sb) return null;
+  const { data } = await sb.auth.getSession();
+  _cachedSession = data?.session ?? null;
+  return _cachedSession;
+}
+
+// ── Synchronous helpers (use cached value) ────────────
+// NOTE: these return the cached session set after login/signup/init.
+// Always call authInitSession() on page load to prime the cache first.
 function authGetSession() {
-  try { return JSON.parse(localStorage.getItem(AUTH_SESSION_KEY) || 'null'); }
-  catch { return null; }
+  return _cachedSession;
 }
 
 function authIsLoggedIn() {
-  return authGetSession() !== null;
+  return _cachedSession !== null;
 }
 
-function authRequire() {
-  if (!authIsLoggedIn()) {
+// ── Init — call on every page load ───────────────────
+async function authInitSession() {
+  const session = await authGetSessionAsync();
+  _cachedSession = session;
+  return session;
+}
+
+// ── Guards ───────────────────────────────────────────
+async function authRequire() {
+  const session = await authInitSession();
+  if (!session) {
     window.location.href = 'login.html';
     return false;
   }
   return true;
 }
 
-function authRedirectIfLoggedIn() {
-  if (authIsLoggedIn()) window.location.href = 'query.html';
+async function authRedirectIfLoggedIn() {
+  const session = await authInitSession();
+  if (session) window.location.href = 'query.html';
+}
+
+// ── Convenience: get user object from session ─────────
+function authGetUser() {
+  const s = authGetSession();
+  if (!s) return null;
+  return {
+    id:    s.user.id,
+    email: s.user.email,
+    name:  s.user.user_metadata?.full_name || s.user.email.split('@')[0],
+    plan:  'free', // profile plan fetched separately if needed
+  };
 }

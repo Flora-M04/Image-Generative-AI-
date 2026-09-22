@@ -1,49 +1,65 @@
 /* =====================================================
-   IMAGE GENERATIVE AI — Usage Limits Helper
+   IMAGE GENERATIVE AI — Usage Limits Helper (Supabase)
+   Count is derived from actual rows in the images table.
    ===================================================== */
 
-const FREE_PLAN_LIMIT  = 5;
-const LIMIT_KEY_PREFIX = 'iga_count_';
+const FREE_PLAN_LIMIT = 5;
 
-function _countKey() {
-  const s = authGetSession();
-  return s ? LIMIT_KEY_PREFIX + s.userId : null;
+// In-memory usage cache (refreshed on page load)
+let _usageCount = 0;
+
+// ── Fetch count from Supabase ─────────────────────────
+async function limitsRefreshCount() {
+  const sb = await getSupabase();
+  if (!sb) return 0;
+
+  const session = authGetSession();
+  if (!session) return 0;
+
+  const { count, error } = await sb
+    .from('images')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', session.user.id);
+
+  if (error) {
+    console.warn('[limits] Could not fetch count:', error.message);
+    return _usageCount; // fall back to cached
+  }
+
+  _usageCount = count ?? 0;
+  return _usageCount;
 }
 
+// ── Getters (synchronous, use cached value) ───────────
 function limitsGetCount() {
-  const key = _countKey();
-  if (!key) return 0;
-  return parseInt(localStorage.getItem(key) || '0', 10);
-}
-
-function limitsIncrement() {
-  const key = _countKey();
-  if (!key) return 0;
-  const n = limitsGetCount() + 1;
-  localStorage.setItem(key, String(n));
-  return n;
+  return _usageCount;
 }
 
 function limitsGetMax() {
-  const s = authGetSession();
-  if (!s) return FREE_PLAN_LIMIT;
-  return s.plan === 'pro' ? Infinity : FREE_PLAN_LIMIT;
+  // Always free for now; extend when pro plan is added
+  return FREE_PLAN_LIMIT;
 }
 
 function limitsGetRemaining() {
   const max = limitsGetMax();
   if (max === Infinity) return Infinity;
-  return Math.max(0, max - limitsGetCount());
+  return Math.max(0, max - _usageCount);
 }
 
 function limitsIsReached() {
   const max = limitsGetMax();
   if (max === Infinity) return false;
-  return limitsGetCount() >= max;
+  return _usageCount >= max;
 }
 
 function limitsGetUsagePercent() {
   const max = limitsGetMax();
   if (max === Infinity) return 0;
-  return Math.min(100, Math.round((limitsGetCount() / max) * 100));
+  return Math.min(100, Math.round((_usageCount / max) * 100));
+}
+
+// ── Increment local cache after a successful generation ──
+function limitsIncrementLocal() {
+  _usageCount += 1;
+  return _usageCount;
 }
