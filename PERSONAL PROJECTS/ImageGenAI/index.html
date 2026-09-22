@@ -3,115 +3,121 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PixelMind AI — Create Stunning AI Images in Seconds</title>
-  <meta name="description" content="PixelMind AI lets you generate breathtaking AI images from simple text prompts. Powered by next-generation models. Start free today." />
+  <title>PixelMind AI — Generate images from text</title>
+  <meta name="description" content="Turn any text prompt into a stunning AI-generated image. PixelMind AI is fast, free to start, and powered by Cloudflare Workers AI." />
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>
-    /* ── Hero ── */
+    /* ── Landing page specific styles ── */
+
+    /* Hero */
     .hero {
-      min-height: 92vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      padding: var(--space-24) var(--space-6) var(--space-20);
       text-align: center;
-      padding: var(--space-8);
-      position: relative;
-      z-index: 1;
+      max-width: 720px;
+      margin: 0 auto;
     }
 
-    .hero-eyebrow {
+    .hero-tag {
       display: inline-flex;
       align-items: center;
       gap: var(--space-2);
-      padding: var(--space-2) var(--space-4);
-      background: rgba(124,58,237,0.12);
-      border: 1px solid rgba(124,58,237,0.3);
-      border-radius: var(--radius-full);
-      font-size: var(--text-sm);
-      font-weight: 600;
-      color: var(--primary-400);
-      margin-bottom: var(--space-6);
-      animation: fadeInDown 0.6s ease both;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-8);
+    }
+
+    .hero-tag-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
     }
 
     .hero-title {
-      font-size: clamp(2.5rem, 7vw, 5.5rem);
-      font-weight: 900;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
+      font-size: clamp(2.5rem, 7vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      color: var(--text-primary);
       margin-bottom: var(--space-6);
-      animation: fadeInDown 0.6s 0.1s ease both;
     }
 
     .hero-sub {
-      font-size: clamp(1rem, 2vw, 1.25rem);
+      font-size: var(--text-lg);
       color: var(--text-secondary);
-      max-width: 560px;
+      line-height: 1.65;
+      max-width: 520px;
       margin: 0 auto var(--space-10);
-      line-height: 1.7;
-      animation: fadeInDown 0.6s 0.2s ease both;
+      font-weight: 400;
     }
 
     .hero-actions {
       display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-8);
+      flex-wrap: wrap;
+    }
+
+    .hero-trust {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       gap: var(--space-4);
       flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: var(--space-12);
-      animation: fadeInDown 0.6s 0.3s ease both;
     }
 
-    .hero-stats {
-      display: flex;
-      gap: var(--space-8);
-      flex-wrap: wrap;
-      justify-content: center;
-      animation: fadeInDown 0.6s 0.4s ease both;
+    .hero-trust-sep {
+      width: 1px; height: 12px;
+      background: var(--border-2);
     }
 
-    .stat-item { text-align: center; }
-    .stat-value {
-      font-size: var(--text-3xl);
-      font-weight: 800;
-      background: var(--grad-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .stat-label { font-size: var(--text-sm); color: var(--text-muted); margin-top: 2px; }
-
-    /* ── Marquee Preview ── */
+    /* Image preview strip */
     .preview-strip {
-      padding: var(--space-12) 0;
       overflow: hidden;
       position: relative;
-      z-index: 1;
-      border-top: 1px solid var(--glass-border);
-      border-bottom: 1px solid var(--glass-border);
+      padding: var(--space-6) 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-surface);
     }
 
     .preview-strip::before,
     .preview-strip::after {
       content: '';
       position: absolute;
-      top: 0; bottom: 0;
-      width: 200px;
+      top: 0;
+      bottom: 0;
+      width: 160px;
       z-index: 2;
     }
-    .preview-strip::before { left: 0; background: linear-gradient(to right, var(--bg-base), transparent); }
-    .preview-strip::after  { right: 0; background: linear-gradient(to left, var(--bg-base), transparent); }
+
+    .preview-strip::before {
+      left: 0;
+      background: linear-gradient(to right, var(--bg-surface), transparent);
+    }
+
+    .preview-strip::after {
+      right: 0;
+      background: linear-gradient(to left, var(--bg-surface), transparent);
+    }
 
     .preview-track {
       display: flex;
-      gap: var(--space-4);
-      animation: marquee 30s linear infinite;
+      gap: var(--space-3);
       width: max-content;
+      animation: marquee 30s linear infinite;
     }
 
     .preview-track-reverse {
       animation-direction: reverse;
-      margin-top: var(--space-4);
+      margin-top: var(--space-3);
     }
 
     @keyframes marquee {
@@ -120,169 +126,278 @@
     }
 
     .preview-img {
-      width: 180px;
-      height: 180px;
-      border-radius: var(--radius-xl);
-      object-fit: cover;
-      border: 1px solid var(--glass-border);
-      flex-shrink: 0;
-      transition: transform var(--transition-base);
-    }
-
-    .preview-img:hover { transform: scale(1.05); }
-
-    /* ── Features ── */
-    .feature-card {
-      padding: var(--space-8);
-    }
-
-    .feature-icon {
-      width: 56px; height: 56px;
+      width: 160px;
+      height: 160px;
       border-radius: var(--radius-lg);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 28px;
-      margin-bottom: var(--space-5);
-      background: rgba(124,58,237,0.1);
-      border: 1px solid rgba(124,58,237,0.2);
+      object-fit: cover;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
     }
 
-    .feature-title {
-      font-size: var(--text-xl);
+    /* ── Features section ── */
+    .features-section {
+      padding: var(--space-24) 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-5);
+      display: block;
+    }
+
+    .section-title {
+      font-size: var(--text-4xl);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: var(--space-4);
+      line-height: 1.1;
+    }
+
+    .section-sub {
+      color: var(--text-secondary);
+      font-size: var(--text-base);
+      max-width: 460px;
+      line-height: 1.7;
+    }
+
+    /* Feature cards — numbered, text-focused */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      margin-top: var(--space-16);
+    }
+
+    .feature-item {
+      background: var(--bg-surface);
+      padding: var(--space-8) var(--space-6);
+      transition: background var(--transition-base);
+    }
+
+    .feature-item:hover { background: var(--bg-elevated); }
+
+    .feature-num {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      margin-bottom: var(--space-4);
+    }
+
+    .feature-name {
+      font-size: var(--text-lg);
       font-weight: 700;
+      color: var(--text-primary);
       margin-bottom: var(--space-3);
+      letter-spacing: -0.025em;
     }
 
     .feature-desc {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    @media (max-width: 900px) {
+      .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 560px) {
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── How it works ── */
+    .steps-section {
+      padding: var(--space-24) 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-8);
+      margin-top: var(--space-16);
+    }
+
+    .step-item {}
+
+    .step-number {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      margin-bottom: var(--space-5);
+      display: block;
+    }
+
+    .step-title {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      margin-bottom: var(--space-3);
+      letter-spacing: -0.025em;
+    }
+
+    .step-desc {
       color: var(--text-secondary);
       font-size: var(--text-sm);
       line-height: 1.7;
     }
 
-    /* ── How it works ── */
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--space-6);
-      position: relative;
+    @media (max-width: 640px) {
+      .steps { grid-template-columns: 1fr; gap: var(--space-10); }
     }
-
-    .steps::before {
-      content: '';
-      position: absolute;
-      top: 28px;
-      left: calc(100% / 6);
-      right: calc(100% / 6);
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(124,58,237,0.5), rgba(236,72,153,0.5), transparent);
-    }
-
-    .step-card { text-align: center; padding: var(--space-8) var(--space-6); }
-
-    .step-number {
-      width: 56px; height: 56px;
-      border-radius: 50%;
-      background: var(--grad-primary);
-      display: flex; align-items: center; justify-content: center;
-      font-size: var(--text-xl);
-      font-weight: 800;
-      margin: 0 auto var(--space-5);
-      box-shadow: var(--shadow-glow);
-    }
-
-    .step-title {
-      font-size: var(--text-lg);
-      font-weight: 700;
-      margin-bottom: var(--space-3);
-    }
-
-    .step-desc { color: var(--text-secondary); font-size: var(--text-sm); line-height: 1.7; }
 
     /* ── Pricing ── */
-    .pricing-card { padding: var(--space-8); }
+    .pricing-section {
+      padding: var(--space-24) 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-5);
+      max-width: 700px;
+      margin: var(--space-16) auto 0;
+    }
+
+    .pricing-card {
+      padding: var(--space-8);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+    }
 
     .pricing-card.featured {
-      background: linear-gradient(145deg, rgba(124,58,237,0.12), rgba(236,72,153,0.06));
-      border-color: rgba(124,58,237,0.4);
-      box-shadow: var(--shadow-glow);
-      position: relative;
-      overflow: visible;
+      border-color: var(--accent-border);
+      background: var(--accent-dim);
+    }
+
+    .pricing-plan {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-4);
+    }
+
+    .pricing-card.featured .pricing-plan { color: var(--text-accent); }
+
+    .pricing-price {
+      font-size: var(--text-5xl);
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 1;
+      margin-bottom: var(--space-1);
+    }
+
+    .pricing-period {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      margin-bottom: var(--space-8);
+    }
+
+    .pricing-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      margin-bottom: var(--space-8);
+    }
+
+    .pricing-features li {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    .pricing-features li.included { color: var(--text-primary); }
+
+    .pricing-features li.included::before {
+      content: '✓';
+      color: var(--success);
+      font-weight: 700;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .pricing-features li:not(.included)::before {
+      content: '–';
+      color: var(--text-muted);
+      font-size: 13px;
+      flex-shrink: 0;
     }
 
     .pricing-tag {
-      position: absolute;
-      top: -14px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--grad-primary);
-      color: white;
-      font-size: var(--text-xs);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      background: var(--accent);
+      color: #fff;
+      font-size: 10px;
       font-weight: 700;
-      padding: var(--space-1) var(--space-4);
+      padding: 3px 10px;
       border-radius: var(--radius-full);
-      white-space: nowrap;
+      margin-bottom: var(--space-4);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
 
-    .pricing-plan { font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--space-3); }
-    .pricing-price { font-size: var(--text-5xl); font-weight: 900; line-height: 1; margin-bottom: var(--space-2); }
-    .pricing-period { font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-6); }
+    @media (max-width: 560px) {
+      .pricing-grid { grid-template-columns: 1fr; }
+    }
 
-    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-8); }
-    .pricing-features li { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-sm); color: var(--text-secondary); }
-    .pricing-features li.included { color: var(--text-primary); }
-    .pricing-features li.included::before { content: '✓'; color: #34d399; font-weight: 700; font-size: 14px; }
-    .pricing-features li:not(.included)::before { content: '✗'; color: var(--text-muted); font-size: 14px; }
-
-    /* ── CTA ── */
+    /* ── CTA section ── */
     .cta-section {
-      background: radial-gradient(ellipse at center, rgba(124,58,237,0.15) 0%, transparent 70%);
-      border-top: 1px solid var(--glass-border);
-      border-bottom: 1px solid var(--glass-border);
+      padding: var(--space-24) 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .cta-title {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.15;
+      margin-bottom: var(--space-5);
     }
 
     /* ── Footer ── */
-    footer {
-      padding: var(--space-8);
-      border-top: 1px solid var(--glass-border);
-      position: relative;
-      z-index: 1;
-    }
-
-    .footer-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: var(--space-4);
-    }
-
     .footer-copy { color: var(--text-muted); font-size: var(--text-sm); }
-
     .footer-links { display: flex; gap: var(--space-6); }
-    .footer-links a { color: var(--text-muted); font-size: var(--text-sm); text-decoration: none; transition: color var(--transition-fast); }
-    .footer-links a:hover { color: var(--text-accent); }
+    .footer-links a {
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+      letter-spacing: -0.01em;
+    }
+    .footer-links a:hover { color: var(--text-primary); }
 
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-20px); }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    @media (max-width: 768px) {
-      .steps { grid-template-columns: 1fr; }
-      .steps::before { display: none; }
-      .hero-stats { gap: var(--space-6); }
-    }
+    .hero-title   { animation: fadeInUp 0.5s ease both; }
+    .hero-sub     { animation: fadeInUp 0.5s 0.1s ease both; }
+    .hero-actions { animation: fadeInUp 0.5s 0.2s ease both; }
+    .hero-trust   { animation: fadeInUp 0.5s 0.3s ease both; }
   </style>
 </head>
 <body>
-
-<!-- Animated Background -->
-<div class="page-bg" aria-hidden="true">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-</div>
 
 <!-- Navigation -->
 <nav class="nav" role="navigation" aria-label="Main navigation">
@@ -292,237 +407,221 @@
   </a>
   <ul class="nav-links" role="list">
     <li><a href="#features" id="nav-features">Features</a></li>
-    <li><a href="#how-it-works" id="nav-how">How It Works</a></li>
+    <li><a href="#how-it-works" id="nav-how">How it works</a></li>
     <li><a href="#pricing" id="nav-pricing">Pricing</a></li>
   </ul>
   <div class="nav-actions">
-    <a href="login.html" class="btn btn-ghost" id="nav-login-btn">Log In</a>
-    <a href="signup.html" class="btn btn-primary" id="nav-signup-btn">Get Started Free</a>
+    <a href="login.html" class="btn btn-ghost btn-sm" id="nav-login-btn">Log in</a>
+    <a href="signup.html" class="btn btn-primary btn-sm" id="nav-signup-btn">Get started</a>
   </div>
 </nav>
 
 <!-- Hero -->
-<section class="hero" id="hero" aria-label="Hero section">
-  <div class="hero-eyebrow" aria-label="New feature announcement">
-    <span>🚀</span> Introducing PixelMind AI v2.0 — Now with SDXL Turbo
+<section class="hero" id="hero" aria-label="Hero">
+  <div class="hero-tag">
+    <div class="hero-tag-dot" aria-hidden="true"></div>
+    Powered by Cloudflare Workers AI
   </div>
   <h1 class="hero-title">
-    Turn Words Into<br>
-    <span class="gradient-text-animated">Stunning Visuals</span>
+    Generate images<br>from&nbsp;words.
   </h1>
   <p class="hero-sub">
-    Generate breathtaking, high-resolution AI images from simple text prompts in seconds.
-    No design skills needed — just describe what you imagine.
+    Describe what you want to see. PixelMind turns your words into a
+    stunning, high-quality image in seconds — no design skills required.
   </p>
   <div class="hero-actions">
     <a href="signup.html" class="btn btn-primary btn-lg" id="hero-cta-primary">
-      ✨ Start Generating Free
+      Start for free
     </a>
-    <a href="login.html" class="btn btn-ghost btn-lg" id="hero-cta-secondary">
-      I have an account →
+    <a href="#how-it-works" class="btn btn-ghost btn-lg" id="hero-cta-secondary">
+      See how it works
     </a>
   </div>
-  <div class="hero-stats" role="list" aria-label="Platform statistics">
-    <div class="stat-item" role="listitem">
-      <div class="stat-value">500K+</div>
-      <div class="stat-label">Images Generated</div>
-    </div>
-    <div class="stat-item" role="listitem">
-      <div class="stat-value">50K+</div>
-      <div class="stat-label">Active Users</div>
-    </div>
-    <div class="stat-item" role="listitem">
-      <div class="stat-value">4.9★</div>
-      <div class="stat-label">User Rating</div>
-    </div>
-    <div class="stat-item" role="listitem">
-      <div class="stat-value">< 3s</div>
-      <div class="stat-label">Generation Time</div>
-    </div>
+  <div class="hero-trust">
+    <span>5 free generations</span>
+    <div class="hero-trust-sep" aria-hidden="true"></div>
+    <span>No credit card required</span>
+    <div class="hero-trust-sep" aria-hidden="true"></div>
+    <span>Instant results</span>
   </div>
 </section>
 
 <!-- Preview Strip -->
 <div class="preview-strip" aria-label="Sample AI-generated images" role="img">
   <div class="preview-track" id="preview-track-1">
-    <img class="preview-img" src="https://picsum.photos/seed/101/360/360" alt="AI generated art 1" loading="lazy">
-    <img class="preview-img" src="https://picsum.photos/seed/202/360/360" alt="AI generated art 2" loading="lazy">
-    <img class="preview-img" src="https://picsum.photos/seed/303/360/360" alt="AI generated art 3" loading="lazy">
-    <img class="preview-img" src="https://picsum.photos/seed/404/360/360" alt="AI generated art 4" loading="lazy">
-    <img class="preview-img" src="https://picsum.photos/seed/505/360/360" alt="AI generated art 5" loading="lazy">
-    <img class="preview-img" src="https://picsum.photos/seed/606/360/360" alt="AI generated art 6" loading="lazy">
-    <img class="preview-img" src="https://picsum.photos/seed/707/360/360" alt="AI generated art 7" loading="lazy">
-    <img class="preview-img" src="https://picsum.photos/seed/808/360/360" alt="AI generated art 8" loading="lazy">
-    <!-- duplicate for seamless loop -->
-    <img class="preview-img" src="https://picsum.photos/seed/101/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/202/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/303/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/404/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/505/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/606/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/707/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/808/360/360" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/101/320/320" alt="AI generated image" loading="lazy">
+    <img class="preview-img" src="https://picsum.photos/seed/202/320/320" alt="AI generated image" loading="lazy">
+    <img class="preview-img" src="https://picsum.photos/seed/303/320/320" alt="AI generated image" loading="lazy">
+    <img class="preview-img" src="https://picsum.photos/seed/404/320/320" alt="AI generated image" loading="lazy">
+    <img class="preview-img" src="https://picsum.photos/seed/505/320/320" alt="AI generated image" loading="lazy">
+    <img class="preview-img" src="https://picsum.photos/seed/606/320/320" alt="AI generated image" loading="lazy">
+    <img class="preview-img" src="https://picsum.photos/seed/707/320/320" alt="AI generated image" loading="lazy">
+    <img class="preview-img" src="https://picsum.photos/seed/808/320/320" alt="AI generated image" loading="lazy">
+    <!-- Seamless loop duplicates -->
+    <img class="preview-img" src="https://picsum.photos/seed/101/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/202/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/303/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/404/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/505/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/606/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/707/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/808/320/320" alt="" loading="lazy" aria-hidden="true">
   </div>
   <div class="preview-track preview-track-reverse">
-    <img class="preview-img" src="https://picsum.photos/seed/111/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/222/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/333/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/444/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/555/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/666/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/777/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/888/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/111/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/222/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/333/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/444/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/555/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/666/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/777/360/360" alt="" loading="lazy" aria-hidden="true">
-    <img class="preview-img" src="https://picsum.photos/seed/888/360/360" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/111/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/222/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/333/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/444/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/555/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/666/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/777/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/888/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/111/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/222/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/333/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/444/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/555/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/666/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/777/320/320" alt="" loading="lazy" aria-hidden="true">
+    <img class="preview-img" src="https://picsum.photos/seed/888/320/320" alt="" loading="lazy" aria-hidden="true">
   </div>
 </div>
 
-<!-- Features Section -->
-<section class="section" id="features" aria-label="Features">
+<!-- Features -->
+<section class="features-section" id="features" aria-label="Features">
   <div class="container">
-    <div class="text-center" style="margin-bottom: var(--space-16);">
-      <div class="badge badge-purple" style="margin-bottom:var(--space-4);">⚡ Capabilities</div>
-      <h2 style="font-size:var(--text-4xl);font-weight:800;margin-bottom:var(--space-4);">
-        Everything You Need to Create
-      </h2>
-      <p style="color:var(--text-secondary); max-width:500px; margin:0 auto;">
-        PixelMind AI packs a powerful feature set into a beautifully simple interface.
-      </p>
-    </div>
-    <div class="grid-3">
-      <div class="card feature-card" id="feature-speed">
-        <div class="feature-icon">⚡</div>
-        <h3 class="feature-title">Lightning Fast</h3>
-        <p class="feature-desc">Generate images in under 3 seconds with our optimized inference pipeline. No waiting, just creating.</p>
+    <span class="section-label">What you get</span>
+    <h2 class="section-title">
+      Built for creators<br>who move fast.
+    </h2>
+    <p class="section-sub">
+      Everything you need to go from idea to image — nothing you don't.
+    </p>
+
+    <div class="feature-grid">
+      <div class="feature-item" id="feature-speed">
+        <div class="feature-num">01</div>
+        <div class="feature-name">Fast generation</div>
+        <p class="feature-desc">Results in seconds. Powered by Flux Schnell and SDXL — optimized for speed without sacrificing quality.</p>
       </div>
-      <div class="card feature-card" id="feature-quality">
-        <div class="feature-icon">🎨</div>
-        <h3 class="feature-title">Photorealistic Quality</h3>
-        <p class="feature-desc">Powered by SDXL and Stable Diffusion 3. Achieve stunning, high-resolution images with rich detail.</p>
+      <div class="feature-item" id="feature-quality">
+        <div class="feature-num">02</div>
+        <div class="feature-name">High-quality output</div>
+        <p class="feature-desc">Full-resolution images ready to download. Rich detail, accurate composition, and consistent results.</p>
       </div>
-      <div class="card feature-card" id="feature-styles">
-        <div class="feature-icon">🖌️</div>
-        <h3 class="feature-title">Infinite Styles</h3>
-        <p class="feature-desc">From hyperrealism to watercolor, anime to oil paintings — generate any art style you can describe.</p>
+      <div class="feature-item" id="feature-styles">
+        <div class="feature-num">03</div>
+        <div class="feature-name">Any style, any subject</div>
+        <p class="feature-desc">Photorealism, illustration, oil painting, anime — if you can describe it, PixelMind can render it.</p>
       </div>
-      <div class="card feature-card" id="feature-history">
-        <div class="feature-icon">🗂️</div>
-        <h3 class="feature-title">Generation History</h3>
-        <p class="feature-desc">Every image you generate is saved to your personal gallery. Download anytime, anywhere.</p>
+      <div class="feature-item" id="feature-gallery">
+        <div class="feature-num">04</div>
+        <div class="feature-name">Personal gallery</div>
+        <p class="feature-desc">Every image you generate is saved automatically. Browse, search, download, or delete at any time.</p>
       </div>
-      <div class="card feature-card" id="feature-private">
-        <div class="feature-icon">🔐</div>
-        <h3 class="feature-title">Private & Secure</h3>
-        <p class="feature-desc">Your prompts and images are private. We never train on your data without your explicit consent.</p>
+      <div class="feature-item" id="feature-private">
+        <div class="feature-num">05</div>
+        <div class="feature-name">Private by default</div>
+        <p class="feature-desc">Your prompts and images belong to you. We don't use your content to train models without your consent.</p>
       </div>
-      <div class="card feature-card" id="feature-api">
-        <div class="feature-icon">🔌</div>
-        <h3 class="feature-title">API Access</h3>
-        <p class="feature-desc">Pro users get full REST API access to integrate PixelMind AI directly into their own products and workflows.</p>
+      <div class="feature-item" id="feature-api">
+        <div class="feature-num">06</div>
+        <div class="feature-name">API access</div>
+        <p class="feature-desc">Pro users get a REST API to integrate image generation directly into their own tools and workflows.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- How it Works -->
-<section class="section" id="how-it-works" style="background: rgba(255,255,255,0.01);" aria-label="How it works">
+<!-- How it works -->
+<section class="steps-section" id="how-it-works" aria-label="How it works">
   <div class="container">
-    <div class="text-center" style="margin-bottom: var(--space-16);">
-      <div class="badge badge-pink" style="margin-bottom:var(--space-4);">✨ Simple Process</div>
-      <h2 style="font-size:var(--text-4xl);font-weight:800;margin-bottom:var(--space-4);">
-        Create in 3 Easy Steps
-      </h2>
-      <p style="color:var(--text-secondary); max-width:500px; margin:0 auto;">
-        No design experience required. If you can describe it, we can create it.
-      </p>
-    </div>
+    <span class="section-label">How it works</span>
+    <h2 class="section-title">Three steps.<br>That's it.</h2>
+    <p class="section-sub">No setup. No design software. Just text and results.</p>
+
     <div class="steps">
-      <div class="card step-card" id="step-1">
-        <div class="step-number">1</div>
-        <h3 class="step-title">Sign Up Free</h3>
-        <p class="step-desc">Create your account in seconds. No credit card needed to get started with your 5 free generations.</p>
+      <div class="step-item" id="step-1">
+        <span class="step-number">Step 01</span>
+        <h3 class="step-title">Create an account</h3>
+        <p class="step-desc">Sign up in under a minute. You get 5 free generations immediately — no payment method needed.</p>
       </div>
-      <div class="card step-card" id="step-2">
-        <div class="step-number">2</div>
-        <h3 class="step-title">Describe Your Vision</h3>
-        <p class="step-desc">Type a detailed prompt describing the image you want. The more detail, the better the result.</p>
+      <div class="step-item" id="step-2">
+        <span class="step-number">Step 02</span>
+        <h3 class="step-title">Write your prompt</h3>
+        <p class="step-desc">Describe the image you want. Be specific — the more detail you give, the more accurate the result.</p>
       </div>
-      <div class="card step-card" id="step-3">
-        <div class="step-number">3</div>
-        <h3 class="step-title">Download & Share</h3>
-        <p class="step-desc">Your image is ready in seconds. Download it in full quality or share it directly from your gallery.</p>
+      <div class="step-item" id="step-3">
+        <span class="step-number">Step 03</span>
+        <h3 class="step-title">Download and use</h3>
+        <p class="step-desc">Your image is ready in seconds. Download it in full quality and use it however you'd like.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Pricing Section -->
-<section class="section" id="pricing" aria-label="Pricing plans">
+<!-- Pricing -->
+<section class="pricing-section" id="pricing" aria-label="Pricing plans">
   <div class="container">
-    <div class="text-center" style="margin-bottom: var(--space-16);">
-      <div class="badge badge-amber" style="margin-bottom:var(--space-4);">💎 Pricing</div>
-      <h2 style="font-size:var(--text-4xl);font-weight:800;margin-bottom:var(--space-4);">
-        Simple, Transparent Pricing
-      </h2>
-      <p style="color:var(--text-secondary); max-width:500px; margin:0 auto;">
-        Start free and upgrade when you're ready to create without limits.
-      </p>
-    </div>
-    <div class="grid-2" style="max-width:720px; margin:0 auto;">
-      <div class="card pricing-card" id="plan-free">
-        <p class="pricing-plan">Free Plan</p>
+    <span class="section-label">Pricing</span>
+    <h2 class="section-title">Simple pricing.</h2>
+    <p class="section-sub">Start free. Upgrade when you need more.</p>
+
+    <div class="pricing-grid">
+
+      <!-- Free Plan -->
+      <div class="pricing-card" id="plan-free">
+        <p class="pricing-plan">Free</p>
         <p class="pricing-price">$<span class="gradient-text">0</span></p>
-        <p class="pricing-period">Forever free</p>
+        <p class="pricing-period">forever</p>
         <ul class="pricing-features">
           <li class="included">5 AI image generations</li>
           <li class="included">Standard resolution (512×512)</li>
           <li class="included">Personal gallery</li>
-          <li class="included">Download images</li>
+          <li class="included">Image download</li>
           <li>Unlimited generations</li>
           <li>HD resolution (1024×1024)</li>
           <li>API access</li>
           <li>Priority queue</li>
         </ul>
-        <a href="signup.html" class="btn btn-ghost w-full" id="cta-free">Get Started Free →</a>
+        <a href="signup.html" class="btn btn-ghost w-full" id="cta-free">Get started free</a>
       </div>
-      <div class="card pricing-card featured" id="plan-pro">
-        <div class="pricing-tag">🔥 Most Popular</div>
-        <p class="pricing-plan" style="color: var(--primary-400);">Pro Plan</p>
+
+      <!-- Pro Plan -->
+      <div class="pricing-card featured" id="plan-pro">
+        <div class="pricing-tag">Most popular</div>
+        <p class="pricing-plan">Pro</p>
         <p class="pricing-price"><span class="gradient-text">$9</span></p>
         <p class="pricing-period">per month</p>
         <ul class="pricing-features">
           <li class="included">Unlimited generations</li>
           <li class="included">HD resolution (1024×1024)</li>
           <li class="included">Personal gallery</li>
-          <li class="included">Download images</li>
+          <li class="included">Image download</li>
           <li class="included">API access</li>
           <li class="included">Priority queue</li>
           <li class="included">Advanced style controls</li>
           <li class="included">Commercial license</li>
         </ul>
-        <a href="signup.html" class="btn btn-primary w-full" id="cta-pro">Upgrade to Pro →</a>
+        <a href="signup.html" class="btn btn-primary w-full" id="cta-pro">Upgrade to Pro</a>
       </div>
+
     </div>
   </div>
 </section>
 
-<!-- CTA Section -->
-<section class="section cta-section" aria-label="Call to action">
-  <div class="container text-center">
-    <h2 style="font-size:var(--text-4xl);font-weight:800;margin-bottom:var(--space-4);">
-      Ready to Create Something<br><span class="gradient-text-animated">Extraordinary?</span>
+<!-- CTA -->
+<section class="cta-section" aria-label="Call to action">
+  <div class="container">
+    <h2 class="cta-title">
+      Start creating today.<br>
+      <span class="gradient-text">It's free.</span>
     </h2>
-    <p style="color:var(--text-secondary); margin-bottom:var(--space-10); font-size:var(--text-lg);">
-      Join 50,000+ creators already building with PixelMind AI.
+    <p style="color: var(--text-secondary); margin-bottom: var(--space-10); font-size: var(--text-lg);">
+      Join thousands of creators already using PixelMind AI.
     </p>
     <a href="signup.html" class="btn btn-primary btn-lg" id="cta-final">
-      ✨ Start for Free — No Credit Card Required
+      Create your free account
     </a>
   </div>
 </section>
@@ -531,10 +630,10 @@
 <footer>
   <div class="footer-inner">
     <div style="display:flex; align-items:center; gap:var(--space-3);">
-      <div class="nav-logo-icon" style="width:28px;height:28px;font-size:14px;" aria-hidden="true">✦</div>
-      <span class="footer-copy">© 2026 PixelMind AI. All rights reserved.</span>
+      <div class="nav-logo-icon" style="width:22px;height:22px;font-size:11px;" aria-hidden="true">✦</div>
+      <span class="footer-copy">© 2026 PixelMind AI</span>
     </div>
-    <nav class="footer-links" aria-label="Footer navigation">
+    <nav class="footer-links" aria-label="Footer links">
       <a href="#" id="footer-privacy">Privacy</a>
       <a href="#" id="footer-terms">Terms</a>
       <a href="#" id="footer-contact">Contact</a>
@@ -542,15 +641,16 @@
   </div>
 </footer>
 
+<script src="assets/js/supabase.js"></script>
 <script src="assets/js/auth.js"></script>
 <script>
-  // Redirect to query if already logged in (optional UX)
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    await authInitSession();
     if (authIsLoggedIn()) {
-      document.getElementById('nav-login-btn').textContent = 'Dashboard';
-      document.getElementById('nav-login-btn').href = 'query.html';
-      document.getElementById('nav-signup-btn').textContent = 'Go to App ✦';
-      document.getElementById('nav-signup-btn').href = 'query.html';
+      const loginBtn  = document.getElementById('nav-login-btn');
+      const signupBtn = document.getElementById('nav-signup-btn');
+      if (loginBtn)  { loginBtn.textContent  = 'Dashboard'; loginBtn.href  = 'query.html'; }
+      if (signupBtn) { signupBtn.textContent = 'Open app';  signupBtn.href = 'query.html'; }
     }
   });
 </script>
