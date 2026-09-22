@@ -5,324 +5,355 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Create Account — PixelMind AI</title>
   <meta name="description" content="Create your free PixelMind AI account and get 5 free AI image generations. No credit card required." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>
+    html, body { height: 100%; }
+
     body {
-      min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--space-6);
+      min-height: 100vh;
+      padding: 2rem;
     }
 
-    .auth-wrapper {
+
+
+    /* ── Form panel ── */
+    .auth-right {
       width: 100%;
-      max-width: 480px;
-      position: relative;
-      z-index: 1;
-      animation: authIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    @keyframes authIn {
-      from { opacity: 0; transform: translateY(30px) scale(0.96); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .auth-header {
-      text-align: center;
-      margin-bottom: var(--space-8);
-    }
-
-    .auth-logo {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-3);
-      text-decoration: none;
-      margin-bottom: var(--space-6);
-    }
-
-    .auth-logo-icon {
-      width: 44px; height: 44px;
-      border-radius: var(--radius-lg);
-      background: var(--grad-primary);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      box-shadow: var(--shadow-glow);
-    }
-
-    .auth-logo-text {
-      font-size: var(--text-2xl);
-      font-weight: 700;
-      background: var(--grad-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .auth-title { font-size: var(--text-3xl); font-weight: 800; margin-bottom: var(--space-2); }
-    .auth-sub { color: var(--text-secondary); font-size: var(--text-sm); }
-
-    .auth-card { padding: var(--space-8); }
-
-    .auth-form {
+      max-width: 420px;
       display: flex;
       flex-direction: column;
-      gap: var(--space-4);
+      align-items: center;
     }
 
-    .auth-footer-text {
-      text-align: center;
-      margin-top: var(--space-6);
-      font-size: var(--text-sm);
-      color: var(--text-muted);
+    .auth-form-container {
+      width: 100%; max-width: 390px;
+      animation: authSlide 0.5s cubic-bezier(0.34,1.4,0.64,1) both;
     }
 
-    .auth-footer-text a {
-      color: var(--text-accent);
-      text-decoration: none;
-      font-weight: 600;
-      transition: color var(--transition-fast);
+    @keyframes authSlide {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    .auth-footer-text a:hover { color: var(--primary-400); }
-
-    .show-password-toggle {
-      position: absolute;
-      right: var(--space-4);
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 18px;
-      padding: 0;
-      transition: color var(--transition-fast);
+    .auth-mobile-logo {
+      display: flex; align-items: center; gap: 0.6rem;
+      text-decoration: none; margin-bottom: 2rem;
     }
 
-    .show-password-toggle:hover { color: var(--text-secondary); }
-
-    /* Password strength meter */
-    .password-strength {
-      margin-top: var(--space-2);
-      display: none;
+    .auth-mobile-logo-icon {
+      width: 30px; height: 30px; border-radius: 7px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: #fff; font-weight: 800;
     }
 
-    .password-strength.visible { display: block; }
-
-    .strength-bar {
-      height: 4px;
-      background: rgba(255,255,255,0.1);
-      border-radius: var(--radius-full);
-      overflow: hidden;
-      margin-bottom: var(--space-1);
+    .auth-mobile-logo-text {
+      font-size: 0.95rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.025em;
     }
 
+    /* Back link */
+    .auth-back {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.78rem; color: rgba(255,255,255,0.25);
+      text-decoration: none; margin-bottom: 1.75rem; transition: color 0.15s;
+    }
+    .auth-back:hover { color: rgba(255,255,255,0.55); }
+
+    /* Heading */
+    .auth-form-heading { margin-bottom: 1.75rem; }
+    .auth-form-title { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.04em; color: #fff; margin-bottom: 0.4rem; }
+    .auth-form-sub { font-size: 0.85rem; color: rgba(255,255,255,0.35); }
+
+    /* Input group */
+    .auth-input-group {
+      display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.25rem;
+    }
+
+    .auth-field { display: flex; flex-direction: column; gap: 0.42rem; }
+
+    .auth-label {
+      font-size: 0.78rem; font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.01em; text-transform: uppercase;
+    }
+
+    .auth-input-wrap { position: relative; }
+
+    .auth-input-icon {
+      position: absolute; left: 1rem; top: 50%;
+      transform: translateY(-50%); font-size: 15px;
+      color: rgba(255,255,255,0.18); pointer-events: none;
+      transition: color 0.18s;
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 0.8rem 1rem 0.8rem 2.7rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem; font-weight: 400;
+      outline: none;
+      transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+      letter-spacing: -0.01em;
+    }
+
+    .auth-input::placeholder { color: rgba(255,255,255,0.18); }
+
+    .auth-input:focus {
+      border-color: var(--accent);
+      background: rgba(109,95,255,0.06);
+      box-shadow: 0 0 0 3px rgba(109,95,255,0.13);
+    }
+
+    .auth-input:focus + .auth-input-icon,
+    .auth-input-wrap:focus-within .auth-input-icon { color: var(--accent); }
+
+    .auth-input.error {
+      border-color: rgba(239,68,68,0.55);
+      background: rgba(239,68,68,0.05);
+    }
+
+    /* Password toggle */
+    .auth-pass-toggle {
+      position: absolute; right: 0.85rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: rgba(255,255,255,0.2);
+      cursor: pointer; font-size: 16px; padding: 0.2rem; line-height: 1;
+      transition: color 0.15s;
+    }
+    .auth-pass-toggle:hover { color: rgba(255,255,255,0.5); }
+
+    /* Password strength */
+    .auth-strength { margin-top: 0.4rem; display: none; }
+    .auth-strength.visible { display: block; }
+    .strength-track {
+      height: 3px; background: rgba(255,255,255,0.07);
+      border-radius: 100px; overflow: hidden; margin-bottom: 0.3rem;
+    }
     .strength-fill {
-      height: 100%;
-      border-radius: var(--radius-full);
-      transition: width 0.3s ease, background 0.3s ease;
+      height: 100%; border-radius: 100px;
+      transition: width 0.3s, background 0.3s;
+    }
+    .strength-text { font-size: 0.7rem; color: rgba(255,255,255,0.3); }
+
+    /* Field error */
+    .auth-field-error { font-size: 0.72rem; color: #f87171; min-height: 1em; }
+
+    /* Submit button */
+    .auth-submit {
+      width: 100%; padding: 0.85rem;
+      background: var(--accent); border: none; border-radius: 10px;
+      color: #fff; font-family: 'Inter', sans-serif;
+      font-size: 0.92rem; font-weight: 600; letter-spacing: -0.01em;
+      cursor: pointer; position: relative; overflow: hidden;
+      transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
+      margin-bottom: 1rem;
+    }
+    .auth-submit::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .auth-submit:hover:not(:disabled) {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 18px rgba(109,95,255,0.38);
+      transform: translateY(-1px);
+    }
+    .auth-submit:active:not(:disabled) { transform: translateY(0); }
+    .auth-submit:disabled { opacity: 0.42; cursor: not-allowed; }
+    .auth-submit.loading { pointer-events: none; }
+    .auth-submit.loading::after {
+      content: ''; position: absolute; right: 1.1rem; top: 50%; margin-top: -7px;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.25);
+      border-top-color: #fff;
+      border-radius: 50%; animation: spin 0.55s linear infinite;
     }
 
-    .strength-label { font-size: var(--text-xs); color: var(--text-muted); }
+    /* Terms */
+    .auth-terms {
+      display: flex; align-items: flex-start; gap: 0.65rem; margin-bottom: 1.25rem;
+    }
+    .auth-terms input[type="checkbox"] {
+      width: 15px; height: 15px; margin-top: 2px;
+      accent-color: var(--accent); cursor: pointer; flex-shrink: 0;
+    }
+    .auth-terms-label {
+      font-size: 0.78rem; color: rgba(255,255,255,0.32); line-height: 1.6; cursor: pointer;
+    }
+    .auth-terms-label a { color: rgba(255,255,255,0.5); text-decoration: underline; text-underline-offset: 2px; }
+    .auth-terms-label a:hover { color: rgba(255,255,255,0.75); }
 
-    /* Free tier badge */
-    .free-badge {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      padding: var(--space-3) var(--space-4);
-      background: rgba(16,185,129,0.08);
-      border: 1px solid rgba(16,185,129,0.2);
-      border-radius: var(--radius-md);
-      margin-bottom: var(--space-5);
+    /* Divider */
+    .auth-divider {
+      display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07);
+    }
+    .auth-divider span {
+      font-size: 0.72rem; color: rgba(255,255,255,0.2);
+      font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
     }
 
-    .free-badge-icon { font-size: 22px; }
-
-    .free-badge-text {
-      font-size: var(--text-sm);
-      color: #34d399;
-      font-weight: 500;
+    /* Login CTA */
+    .auth-login-cta {
+      width: 100%; padding: 0.8rem; background: transparent;
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+      color: rgba(255,255,255,0.6); font-family: 'Inter', sans-serif;
+      font-size: 0.88rem; font-weight: 500; cursor: pointer;
+      text-align: center; text-decoration: none; display: block;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      letter-spacing: -0.01em;
+    }
+    .auth-login-cta:hover {
+      border-color: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.04); color: #fff;
     }
 
-    .free-badge-text span {
-      display: block;
-      font-size: var(--text-xs);
-      color: var(--text-muted);
-      font-weight: 400;
-      margin-top: 2px;
+    /* Footer */
+    .auth-form-footer {
+      margin-top: 1.5rem; text-align: center;
+      font-size: 0.73rem; color: rgba(255,255,255,0.2); line-height: 1.6;
     }
-
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-2);
-      color: var(--text-muted);
-      font-size: var(--text-sm);
-      text-decoration: none;
-      margin-bottom: var(--space-8);
-      transition: color var(--transition-fast);
+    .auth-form-footer a {
+      color: rgba(255,255,255,0.35); text-decoration: underline; text-underline-offset: 2px;
     }
+    .auth-form-footer a:hover { color: rgba(255,255,255,0.6); }
 
-    .back-link:hover { color: var(--text-accent); }
-
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
-
-    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-5px); }
+      40%      { transform: translateX(5px); }
+      60%      { transform: translateX(-3px); }
+      80%      { transform: translateX(3px); }
+    }
   </style>
 </head>
 <body>
 
-<!-- Animated Background -->
-<div class="page-bg" aria-hidden="true">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-</div>
+<div class="auth-right">
+  <div class="auth-form-container">
 
-<div class="auth-wrapper">
-  <a href="index.html" class="back-link" id="back-to-home">← Back to home</a>
-
-  <div class="auth-header">
-    <a href="index.html" class="auth-logo" id="auth-logo">
-      <div class="auth-logo-icon" aria-hidden="true">✦</div>
-      <span class="auth-logo-text">PixelMind AI</span>
+    <!-- Mobile logo -->
+    <a href="index.html" class="auth-mobile-logo" id="auth-mobile-logo">
+      <div class="auth-mobile-logo-icon" aria-hidden="true">✦</div>
+      <span class="auth-mobile-logo-text">PixelMind AI</span>
     </a>
-    <h1 class="auth-title">Create your account</h1>
-    <p class="auth-sub">Start generating AI images for free. No credit card needed.</p>
-  </div>
 
-  <div class="card auth-card">
-    <!-- Free tier highlight -->
-    <div class="free-badge" role="note" aria-label="Free plan details">
-      <div class="free-badge-icon">🎁</div>
-      <div class="free-badge-text">
-        Free plan includes 5 AI image generations
-        <span>Upgrade anytime for unlimited access</span>
-      </div>
+    <a href="index.html" class="auth-back" id="back-to-home">← Back to home</a>
+
+    <div class="auth-form-heading">
+      <h2 class="auth-form-title">Create your account</h2>
+      <p class="auth-form-sub">Start generating AI images for free. No credit card needed.</p>
     </div>
 
-    <form class="auth-form" id="signup-form" novalidate autocomplete="on">
-      <!-- Name row -->
-      <div class="form-group">
-        <label class="form-label" for="fullname">Full Name</label>
-        <div class="input-wrapper">
-          <span class="input-icon" aria-hidden="true">👤</span>
-          <input
-            class="form-input"
-            type="text"
-            id="fullname"
-            name="fullname"
-            autocomplete="name"
-            placeholder="Your full name"
-            required
-            aria-required="true"
-          />
-        </div>
-        <span class="form-error" id="name-error" role="alert" aria-live="polite"></span>
-      </div>
+    <form id="signup-form" novalidate autocomplete="on">
+      <div class="auth-input-group">
 
-      <!-- Email -->
-      <div class="form-group">
-        <label class="form-label" for="email">Email address</label>
-        <div class="input-wrapper">
-          <span class="input-icon" aria-hidden="true">✉</span>
-          <input
-            class="form-input"
-            type="email"
-            id="email"
-            name="email"
-            autocomplete="email"
-            placeholder="you@example.com"
-            required
-            aria-required="true"
-          />
-        </div>
-        <span class="form-error" id="email-error" role="alert" aria-live="polite"></span>
-      </div>
-
-      <!-- Password -->
-      <div class="form-group">
-        <label class="form-label" for="password">Password</label>
-        <div class="input-wrapper">
-          <span class="input-icon" aria-hidden="true">🔒</span>
-          <input
-            class="form-input"
-            type="password"
-            id="password"
-            name="password"
-            autocomplete="new-password"
-            placeholder="Min. 8 characters"
-            required
-            aria-required="true"
-            aria-describedby="password-strength-label"
-          />
-          <button type="button" class="show-password-toggle" id="toggle-password" aria-label="Toggle password visibility">👁</button>
-        </div>
-        <div class="password-strength" id="password-strength">
-          <div class="strength-bar">
-            <div class="strength-fill" id="strength-fill"></div>
+        <!-- Full Name -->
+        <div class="auth-field">
+          <label class="auth-label" for="fullname">Full Name</label>
+          <div class="auth-input-wrap">
+            <input
+              class="auth-input" type="text" id="fullname" name="fullname"
+              autocomplete="name" placeholder="Your full name"
+              required aria-required="true"
+            />
+            <span class="auth-input-icon" aria-hidden="true">👤</span>
           </div>
-          <span class="strength-label" id="password-strength-label"></span>
+          <span class="auth-field-error" id="name-error" role="alert" aria-live="polite"></span>
         </div>
-        <span class="form-error" id="password-error" role="alert" aria-live="polite"></span>
+
+        <!-- Email -->
+        <div class="auth-field">
+          <label class="auth-label" for="email">Email address</label>
+          <div class="auth-input-wrap">
+            <input
+              class="auth-input" type="email" id="email" name="email"
+              autocomplete="email" placeholder="you@example.com"
+              required aria-required="true"
+            />
+            <span class="auth-input-icon" aria-hidden="true">✉</span>
+          </div>
+          <span class="auth-field-error" id="email-error" role="alert" aria-live="polite"></span>
+        </div>
+
+        <!-- Password -->
+        <div class="auth-field">
+          <label class="auth-label" for="password">Password</label>
+          <div class="auth-input-wrap">
+            <input
+              class="auth-input" type="password" id="password" name="password"
+              autocomplete="new-password" placeholder="Min. 8 characters"
+              required aria-required="true" aria-describedby="strength-text"
+            />
+            <span class="auth-input-icon" aria-hidden="true">🔒</span>
+            <button type="button" class="auth-pass-toggle" id="toggle-password" aria-label="Toggle password visibility">👁</button>
+          </div>
+          <!-- Strength meter -->
+          <div class="auth-strength" id="password-strength">
+            <div class="strength-track">
+              <div class="strength-fill" id="strength-fill"></div>
+            </div>
+            <span class="strength-text" id="strength-text">Password strength: —</span>
+          </div>
+          <span class="auth-field-error" id="password-error" role="alert" aria-live="polite"></span>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="auth-field">
+          <label class="auth-label" for="confirm-password">Confirm Password</label>
+          <div class="auth-input-wrap">
+            <input
+              class="auth-input" type="password" id="confirm-password" name="confirm-password"
+              autocomplete="new-password" placeholder="Re-enter your password"
+              required aria-required="true"
+            />
+            <span class="auth-input-icon" aria-hidden="true">🔒</span>
+          </div>
+          <span class="auth-field-error" id="confirm-error" role="alert" aria-live="polite"></span>
+        </div>
+
       </div>
 
-      <!-- Confirm Password -->
-      <div class="form-group">
-        <label class="form-label" for="confirm-password">Confirm Password</label>
-        <div class="input-wrapper">
-          <span class="input-icon" aria-hidden="true">🔒</span>
-          <input
-            class="form-input"
-            type="password"
-            id="confirm-password"
-            name="confirm-password"
-            autocomplete="new-password"
-            placeholder="Re-enter your password"
-            required
-            aria-required="true"
-          />
-        </div>
-        <span class="form-error" id="confirm-error" role="alert" aria-live="polite"></span>
-      </div>
-
-      <!-- Terms checkbox -->
-      <div style="display:flex; align-items:flex-start; gap:var(--space-3);">
-        <input type="checkbox" id="terms" name="terms" style="margin-top:3px; accent-color:var(--primary-500); width:16px;height:16px; cursor:pointer;" required aria-required="true">
-        <label for="terms" style="font-size:var(--text-xs); color:var(--text-secondary); cursor:pointer; line-height:1.6;">
-          I agree to the <a href="#" style="color:var(--text-accent); text-decoration:none;" id="tos-link">Terms of Service</a>
-          and <a href="#" style="color:var(--text-accent); text-decoration:none;" id="privacy-link">Privacy Policy</a>
+      <!-- Terms -->
+      <div class="auth-terms">
+        <input type="checkbox" id="terms" name="terms" required aria-required="true" />
+        <label class="auth-terms-label" for="terms">
+          I agree to the <a href="#" id="tos-link">Terms of Service</a> and <a href="#" id="privacy-link">Privacy Policy</a>
         </label>
       </div>
-      <span class="form-error" id="terms-error" role="alert" aria-live="polite"></span>
+      <span class="auth-field-error" id="terms-error" style="display:block;margin-top:-0.75rem;margin-bottom:0.9rem;" role="alert" aria-live="polite"></span>
 
       <!-- Submit -->
-      <button type="submit" class="btn btn-primary btn-lg w-full" id="signup-btn" style="margin-top:var(--space-2);">
+      <button type="submit" class="auth-submit" id="signup-btn">
         <span class="btn-label">Create Free Account ✦</span>
       </button>
     </form>
 
-    <div class="divider-text">already a member?</div>
+    <div class="auth-divider"><span>already a member?</span></div>
 
-    <a href="login.html" class="btn btn-ghost w-full" id="goto-login">
-      Log In →
-    </a>
+    <a href="login.html" class="auth-login-cta" id="goto-login">Log In →</a>
+
+    <p class="auth-form-footer">Your data is safe. We never share it with third parties.</p>
   </div>
-
-  <p class="auth-footer-text">
-    Your data is safe. We never share it with third parties.
-  </p>
 </div>
 
+<!-- Toast Container -->
 <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
+<script src="assets/js/supabase.js"></script>
 <script src="assets/js/auth.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    authRedirectIfLoggedIn();
+  document.addEventListener('DOMContentLoaded', async () => {
+    await authRedirectIfLoggedIn();
 
     const form          = document.getElementById('signup-form');
     const signupBtn     = document.getElementById('signup-btn');
@@ -334,7 +365,7 @@
     const togglePass    = document.getElementById('toggle-password');
     const strengthBar   = document.getElementById('password-strength');
     const strengthFill  = document.getElementById('strength-fill');
-    const strengthLabel = document.getElementById('password-strength-label');
+    const strengthLabel = document.getElementById('strength-text');
     const toasts        = document.getElementById('toast-container');
 
     // Password toggle
@@ -344,13 +375,13 @@
       togglePass.textContent = isText ? '👁' : '🙈';
     });
 
-    // Password strength checker
+    // Password strength
     passInput.addEventListener('input', () => {
       const val = passInput.value;
       passInput.classList.remove('error');
       document.getElementById('password-error').textContent = '';
 
-      if (val.length === 0) { strengthBar.classList.remove('visible'); return; }
+      if (!val.length) { strengthBar.classList.remove('visible'); return; }
       strengthBar.classList.add('visible');
 
       let score = 0;
@@ -371,12 +402,10 @@
       strengthLabel.textContent     = `Password strength: ${lvl.label}`;
     });
 
-    // Clear errors on input
-    [nameInput, emailInput, passInput, confirmInput].forEach(el => {
-      el.addEventListener('input', () => {
-        el.classList.remove('error');
-      });
-    });
+    // Clear errors
+    [nameInput, emailInput, passInput, confirmInput].forEach(el =>
+      el.addEventListener('input', () => el.classList.remove('error'))
+    );
 
     // Toast
     function showToast(msg, type) {
@@ -386,8 +415,7 @@
       t.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
       toasts.appendChild(t);
       setTimeout(() => {
-        t.style.opacity = '0';
-        t.style.transform = 'translateX(60px)';
+        t.style.opacity = '0'; t.style.transform = 'translateX(60px)';
         t.style.transition = 'all 0.3s ease';
         setTimeout(() => t.remove(), 300);
       }, 3500);
@@ -441,25 +469,29 @@
       e.preventDefault();
       if (!validate()) return;
 
-      signupBtn.classList.add('btn-loading');
+      signupBtn.classList.add('loading');
       signupBtn.disabled = true;
 
-      await new Promise(r => setTimeout(r, 900));
-
-      const result = authSignup(
+      const result = await authSignup(
         nameInput.value.trim(),
         emailInput.value.trim(),
         passInput.value
       );
 
-      signupBtn.classList.remove('btn-loading');
+      signupBtn.classList.remove('loading');
       signupBtn.disabled = false;
 
       if (result.success) {
-        showToast('Account created! Redirecting to login…', 'success');
-        signupBtn.querySelector('.btn-label').textContent = '✓ Account Created!';
-        signupBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-        setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+        if (result.requiresConfirmation) {
+          showToast('Account created! Please check your email to confirm.', 'success');
+          signupBtn.querySelector('.btn-label').textContent = '✉ Check Your Email';
+          signupBtn.style.background = 'linear-gradient(135deg, #3b82f6, #1d4ed8)';
+        } else {
+          showToast('Account created! Redirecting…', 'success');
+          signupBtn.querySelector('.btn-label').textContent = '✓ Account Created!';
+          signupBtn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+          setTimeout(() => { window.location.href = 'query.html'; }, 1000);
+        }
       } else {
         emailInput.classList.add('error');
         document.getElementById('email-error').textContent = '⚠ ' + result.message;

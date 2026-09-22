@@ -5,242 +5,628 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Log In — PixelMind AI</title>
   <meta name="description" content="Log in to your PixelMind AI account and start generating stunning AI images." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>
+    /* ── Full-page split layout ── */
+    html, body { height: 100%; overflow: hidden; }
+
     body {
-      min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--space-6);
+      min-height: 100vh;
+      padding: 2rem;
     }
 
-    .auth-wrapper {
-      width: 100%;
-      max-width: 440px;
+
+
+    /* Radial glow background */
+    .auth-left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 30% 20%, rgba(109,95,255,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 80% 80%, rgba(168,85,247,0.14) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    /* Animated soft orb */
+    .auth-orb {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(109,95,255,0.18) 0%, transparent 70%);
+      animation: orbPulse 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes orbPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+      50%       { transform: translate(-50%, -50%) scale(1.12); opacity: 1; }
+    }
+
+    /* Grid pattern overlay */
+    .auth-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(109,95,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(109,95,255,0.04) 1px, transparent 1px);
+      background-size: 52px 52px;
+      pointer-events: none;
+    }
+
+    .auth-left-logo {
       position: relative;
-      z-index: 1;
-      animation: authIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    @keyframes authIn {
-      from { opacity: 0; transform: translateY(30px) scale(0.96); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .auth-header {
-      text-align: center;
-      margin-bottom: var(--space-8);
-    }
-
-    .auth-logo {
-      display: inline-flex;
+      z-index: 2;
+      display: flex;
       align-items: center;
-      gap: var(--space-3);
+      gap: 0.6rem;
       text-decoration: none;
-      margin-bottom: var(--space-6);
     }
 
-    .auth-logo-icon {
-      width: 44px; height: 44px;
-      border-radius: var(--radius-lg);
-      background: var(--grad-primary);
+    .auth-left-logo-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--accent);
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      box-shadow: var(--shadow-glow);
+      font-size: 15px;
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 0 16px rgba(109,95,255,0.5);
     }
 
-    .auth-logo-text {
-      font-size: var(--text-2xl);
+    .auth-left-logo-text {
+      font-size: 1rem;
       font-weight: 700;
-      background: var(--grad-primary);
+      color: #fff;
+      letter-spacing: -0.025em;
+    }
+
+    /* Centre hero text */
+    .auth-left-body {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 2rem 0;
+    }
+
+    .auth-left-eyebrow {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .auth-left-eyebrow::before {
+      content: '';
+      width: 20px; height: 1px;
+      background: var(--accent);
+    }
+
+    .auth-left-headline {
+      font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.04em;
+      color: #fff;
+      margin-bottom: 1.25rem;
+    }
+
+    .auth-left-headline span {
+      background: linear-gradient(135deg, #a78bfa, #6d5fff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
-    .auth-title {
-      font-size: var(--text-3xl);
-      font-weight: 800;
-      margin-bottom: var(--space-2);
+    .auth-left-sub {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.42);
+      line-height: 1.7;
+      max-width: 340px;
     }
 
-    .auth-sub {
-      color: var(--text-secondary);
-      font-size: var(--text-sm);
+    /* Stat pills */
+    .auth-stats {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
     }
 
-    .auth-card {
-      padding: var(--space-8);
+    .auth-stat {
+      padding: 0.45rem 0.9rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 100px;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.5);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
-    .auth-form {
+    .auth-stat strong { color: rgba(255,255,255,0.85); font-weight: 600; }
+
+    /* Testimonial card */
+    .auth-testimonial {
+      position: relative;
+      z-index: 2;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .auth-testimonial-text {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.65;
+      margin-bottom: 0.85rem;
+      font-style: italic;
+    }
+
+    .auth-testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .auth-testimonial-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6d5fff, #a855f7);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: #fff;
+    }
+
+    .auth-testimonial-name {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.65);
+    }
+
+    /* ── Form panel ── */
+    .auth-right {
+      width: 100%;
+      max-width: 420px;
       display: flex;
       flex-direction: column;
-      gap: var(--space-5);
+      align-items: center;
     }
 
-    .auth-footer-text {
-      text-align: center;
-      margin-top: var(--space-6);
-      font-size: var(--text-sm);
-      color: var(--text-muted);
+    .auth-form-container {
+      width: 100%;
+      max-width: 380px;
+      animation: authSlide 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) both;
     }
 
-    .auth-footer-text a {
-      color: var(--text-accent);
+    @keyframes authSlide {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-mobile-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
       text-decoration: none;
-      font-weight: 600;
-      transition: color var(--transition-fast);
+      margin-bottom: 2rem;
     }
 
-    .auth-footer-text a:hover { color: var(--primary-400); }
+    .auth-mobile-logo-icon {
+      width: 30px; height: 30px;
+      border-radius: 7px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: #fff; font-weight: 800;
+    }
 
-    .show-password-toggle {
+    .auth-mobile-logo-text {
+      font-size: 0.95rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.025em;
+    }
+
+    /* Form heading */
+    .auth-form-heading {
+      margin-bottom: 2rem;
+    }
+
+    .auth-form-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+
+    .auth-form-sub {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* ── Input group ── */
+    .auth-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .auth-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .auth-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+    }
+
+    .auth-input-wrap {
+      position: relative;
+    }
+
+    .auth-input-icon {
       position: absolute;
-      right: var(--space-4);
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px;
+      color: rgba(255,255,255,0.2);
+      pointer-events: none;
+      transition: color 0.2s ease;
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 0.8rem 1rem 0.8rem 2.7rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 400;
+      outline: none;
+      transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+      letter-spacing: -0.01em;
+    }
+
+    .auth-input::placeholder { color: rgba(255,255,255,0.2); }
+
+    .auth-input:focus {
+      border-color: var(--accent);
+      background: rgba(109,95,255,0.06);
+      box-shadow: 0 0 0 3px rgba(109,95,255,0.14);
+    }
+
+    .auth-input:focus + .auth-input-icon,
+    .auth-input-wrap:focus-within .auth-input-icon {
+      color: var(--accent);
+    }
+
+    .auth-input.error {
+      border-color: rgba(239,68,68,0.6);
+      background: rgba(239,68,68,0.05);
+    }
+
+    /* Password toggle */
+    .auth-pass-toggle {
+      position: absolute;
+      right: 0.85rem;
       top: 50%;
       transform: translateY(-50%);
       background: none;
       border: none;
-      color: var(--text-muted);
+      color: rgba(255,255,255,0.22);
       cursor: pointer;
-      font-size: 18px;
-      padding: 0;
-      transition: color var(--transition-fast);
+      font-size: 16px;
+      padding: 0.2rem;
+      line-height: 1;
+      transition: color 0.15s ease;
     }
 
-    .show-password-toggle:hover { color: var(--text-secondary); }
+    .auth-pass-toggle:hover { color: rgba(255,255,255,0.5); }
 
-    .error-banner {
-      padding: var(--space-3) var(--space-4);
-      background: rgba(239,68,68,0.1);
-      border: 1px solid rgba(239,68,68,0.3);
-      border-radius: var(--radius-md);
-      font-size: var(--text-sm);
+    /* Forgot password row */
+    .auth-forgot-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .auth-forgot {
+      font-size: 0.75rem;
+      color: var(--accent);
+      text-decoration: none;
+      opacity: 0.8;
+      transition: opacity 0.15s;
+    }
+
+    .auth-forgot:hover { opacity: 1; }
+
+    /* Error inline */
+    .auth-field-error {
+      font-size: 0.72rem;
       color: #f87171;
+      min-height: 1em;
+    }
+
+    /* ── Error banner ── */
+    .auth-error-banner {
       display: none;
       align-items: center;
-      gap: var(--space-2);
+      gap: 0.6rem;
+      padding: 0.75rem 1rem;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 10px;
+      font-size: 0.82rem;
+      color: #f87171;
+      margin-bottom: 1.2rem;
+      animation: none;
     }
 
-    .error-banner.visible { display: flex; }
+    .auth-error-banner.visible { display: flex; }
 
-    .back-link {
+    /* ── Submit button ── */
+    .auth-submit {
+      width: 100%;
+      padding: 0.85rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+      margin-bottom: 1.1rem;
+    }
+
+    .auth-submit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .auth-submit:hover:not(:disabled) {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 18px rgba(109,95,255,0.38);
+      transform: translateY(-1px);
+    }
+
+    .auth-submit:active:not(:disabled) { transform: translateY(0); }
+    .auth-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* Loading spinner inside button */
+    .auth-submit.loading { pointer-events: none; }
+    .auth-submit.loading::after {
+      content: '';
+      position: absolute;
+      right: 1.1rem;
+      top: 50%; margin-top: -7px;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.25);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.55s linear infinite;
+    }
+
+    /* Divider */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .auth-divider::before, .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+    }
+
+    .auth-divider span {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.2);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* Signup CTA */
+    .auth-signup-cta {
+      width: 100%;
+      padding: 0.8rem;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: rgba(255,255,255,0.65);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      letter-spacing: -0.01em;
+    }
+
+    .auth-signup-cta:hover {
+      border-color: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.04);
+      color: #fff;
+    }
+
+    /* Footer */
+    .auth-form-footer {
+      margin-top: 1.75rem;
+      text-align: center;
+      font-size: 0.73rem;
+      color: rgba(255,255,255,0.2);
+      line-height: 1.6;
+    }
+
+    .auth-form-footer a {
+      color: rgba(255,255,255,0.35);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .auth-form-footer a:hover { color: rgba(255,255,255,0.6); }
+
+    /* Back link */
+    .auth-back {
       display: inline-flex;
       align-items: center;
-      gap: var(--space-2);
-      color: var(--text-muted);
-      font-size: var(--text-sm);
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.25);
       text-decoration: none;
-      margin-bottom: var(--space-8);
-      transition: color var(--transition-fast);
+      margin-bottom: 2.25rem;
+      transition: color 0.15s;
     }
 
-    .back-link:hover { color: var(--text-accent); }
+    .auth-back:hover { color: rgba(255,255,255,0.55); }
+
+    /* Shake animation */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-5px); }
+      40%       { transform: translateX(5px); }
+      60%       { transform: translateX(-3px); }
+      80%       { transform: translateX(3px); }
+    }
+
+    /* ── Star accent field focus ── */
+    .auth-input:focus ~ .auth-input-icon { color: var(--accent); }
   </style>
 </head>
 <body>
 
-<!-- Animated Background -->
-<div class="page-bg" aria-hidden="true">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-</div>
+<div class="auth-right">
+  <div class="auth-form-container">
 
-<div class="auth-wrapper">
-  <a href="index.html" class="back-link" id="back-to-home">← Back to home</a>
-
-  <div class="auth-header">
-    <a href="index.html" class="auth-logo" id="auth-logo">
-      <div class="auth-logo-icon" aria-hidden="true">✦</div>
-      <span class="auth-logo-text">PixelMind AI</span>
+    <!-- Mobile logo -->
+    <a href="index.html" class="auth-mobile-logo" id="auth-mobile-logo">
+      <div class="auth-mobile-logo-icon" aria-hidden="true">✦</div>
+      <span class="auth-mobile-logo-text">PixelMind AI</span>
     </a>
-    <h1 class="auth-title">Welcome back</h1>
-    <p class="auth-sub">Log in to continue creating amazing AI art.</p>
-  </div>
 
-  <div class="card auth-card">
+    <a href="index.html" class="auth-back" id="back-to-home">← Back to home</a>
+
+    <div class="auth-form-heading">
+      <h2 class="auth-form-title">Welcome back</h2>
+      <p class="auth-form-sub">Log in to continue creating amazing AI art.</p>
+    </div>
+
     <!-- Error Banner -->
-    <div class="error-banner" id="error-banner" role="alert" aria-live="polite">
+    <div class="auth-error-banner" id="error-banner" role="alert" aria-live="polite">
       <span>⚠️</span>
       <span id="error-message">Invalid email or password.</span>
     </div>
 
-    <form class="auth-form" id="login-form" novalidate autocomplete="on">
-      <!-- Email -->
-      <div class="form-group">
-        <label class="form-label" for="email">Email address</label>
-        <div class="input-wrapper">
-          <span class="input-icon" aria-hidden="true">✉</span>
-          <input
-            class="form-input"
-            type="email"
-            id="email"
-            name="email"
-            autocomplete="email"
-            placeholder="you@example.com"
-            required
-            aria-required="true"
-          />
-        </div>
-        <span class="form-error" id="email-error" role="alert" aria-live="polite"></span>
-      </div>
+    <form id="login-form" novalidate autocomplete="on">
+      <div class="auth-input-group">
 
-      <!-- Password -->
-      <div class="form-group">
-        <div class="flex-between">
-          <label class="form-label" for="password">Password</label>
-          <a href="#" id="forgot-password" style="font-size:var(--text-xs); color:var(--text-accent); text-decoration:none;">Forgot password?</a>
+        <!-- Email -->
+        <div class="auth-field">
+          <label class="auth-label" for="email">Email address</label>
+          <div class="auth-input-wrap">
+            <input
+              class="auth-input"
+              type="email"
+              id="email"
+              name="email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              required
+              aria-required="true"
+            />
+            <span class="auth-input-icon" aria-hidden="true">✉</span>
+          </div>
+          <span class="auth-field-error" id="email-error" role="alert" aria-live="polite"></span>
         </div>
-        <div class="input-wrapper">
-          <span class="input-icon" aria-hidden="true">🔒</span>
-          <input
-            class="form-input"
-            type="password"
-            id="password"
-            name="password"
-            autocomplete="current-password"
-            placeholder="Enter your password"
-            required
-            aria-required="true"
-          />
-          <button type="button" class="show-password-toggle" id="toggle-password" aria-label="Toggle password visibility">👁</button>
+
+        <!-- Password -->
+        <div class="auth-field">
+          <div class="auth-forgot-row">
+            <label class="auth-label" for="password">Password</label>
+            <a href="#" class="auth-forgot" id="forgot-password">Forgot password?</a>
+          </div>
+          <div class="auth-input-wrap">
+            <input
+              class="auth-input"
+              type="password"
+              id="password"
+              name="password"
+              autocomplete="current-password"
+              placeholder="Enter your password"
+              required
+              aria-required="true"
+            />
+            <span class="auth-input-icon" aria-hidden="true">🔒</span>
+            <button type="button" class="auth-pass-toggle" id="toggle-password" aria-label="Toggle password visibility">👁</button>
+          </div>
+          <span class="auth-field-error" id="password-error" role="alert" aria-live="polite"></span>
         </div>
-        <span class="form-error" id="password-error" role="alert" aria-live="polite"></span>
+
       </div>
 
       <!-- Submit -->
-      <button type="submit" class="btn btn-primary btn-lg w-full" id="login-btn">
+      <button type="submit" class="auth-submit" id="login-btn">
         <span class="btn-label">Log In →</span>
       </button>
     </form>
 
-    <div class="divider-text">or</div>
+    <div class="auth-divider"><span>or</span></div>
 
-    <div style="text-align:center;">
-      <p style="font-size:var(--text-xs); color:var(--text-muted); margin-bottom:var(--space-3);">
-        Don't have an account?
-      </p>
-      <a href="signup.html" class="btn btn-outline w-full" id="goto-signup">
-        Create Account Free ✦
-      </a>
-    </div>
+    <a href="signup.html" class="auth-signup-cta" id="goto-signup">
+      Create a free account ✦
+    </a>
+
+    <p class="auth-form-footer">
+      By logging in you agree to our <a href="#" id="tos-link">Terms</a> and <a href="#" id="privacy-link">Privacy Policy</a>.
+    </p>
   </div>
-
-  <p class="auth-footer-text">
-    By logging in you agree to our <a href="#" id="tos-link">Terms</a> and <a href="#" id="privacy-link">Privacy Policy</a>.
-  </p>
 </div>
 
+<!-- Toast Container -->
 <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
+<script src="assets/js/supabase.js"></script>
 <script src="assets/js/auth.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // Already logged in? redirect
-    authRedirectIfLoggedIn();
+  document.addEventListener('DOMContentLoaded', async () => {
+    await authRedirectIfLoggedIn();
 
     const form        = document.getElementById('login-form');
     const loginBtn    = document.getElementById('login-btn');
@@ -288,7 +674,7 @@
       }, 3500);
     }
 
-    // Validate fields
+    // Validate
     function validate() {
       let valid = true;
       const email = emailInput.value.trim();
@@ -318,27 +704,24 @@
       e.preventDefault();
       if (!validate()) return;
 
-      loginBtn.classList.add('btn-loading');
+      loginBtn.classList.add('loading');
       loginBtn.disabled = true;
 
-      // Simulate network delay
-      await new Promise(r => setTimeout(r, 800));
+      const result = await authLogin(emailInput.value.trim(), passInput.value);
 
-      const result = authLogin(emailInput.value.trim(), passInput.value);
-
-      loginBtn.classList.remove('btn-loading');
+      loginBtn.classList.remove('loading');
       loginBtn.disabled = false;
 
       if (result.success) {
         showToast('Logged in successfully! Redirecting…', 'success');
         loginBtn.querySelector('.btn-label').textContent = '✓ Success!';
-        setTimeout(() => { window.location.href = 'query.html'; }, 1000);
+        loginBtn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+        setTimeout(() => { window.location.href = 'query.html'; }, 900);
       } else {
         errorMsg.textContent = result.message;
         errorBanner.classList.add('visible');
         emailInput.classList.add('error');
         passInput.classList.add('error');
-        // Shake animation
         errorBanner.style.animation = 'none';
         requestAnimationFrame(() => {
           errorBanner.style.animation = 'shake 0.4s ease';
@@ -347,14 +730,5 @@
     });
   });
 </script>
-<style>
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20%       { transform: translateX(-6px); }
-    40%       { transform: translateX(6px); }
-    60%       { transform: translateX(-4px); }
-    80%       { transform: translateX(4px); }
-  }
-</style>
 </body>
 </html>

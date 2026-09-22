@@ -446,7 +446,7 @@
       .sidebar { display: none; }
       .sidebar.open { display: flex; position: fixed; z-index: 200; left: 0; top: 0; height: 100vh; }
       .sidebar-toggle { display: flex; }
-      .prompt-area, .gallery-area { padding: var(--space-5) var(--space-4); }
+      .prompt-area { padding: var(--space-5) var(--space-4); }
       .main-topbar { padding: var(--space-3) var(--space-4); }
     }
   </style>
@@ -475,10 +475,10 @@
         <span class="sidebar-item-icon" aria-hidden="true">✨</span>
         Generate
       </a>
-      <button class="sidebar-item" id="nav-gallery-btn">
+      <a href="gallery.html" class="sidebar-item" id="nav-gallery-btn">
         <span class="sidebar-item-icon" aria-hidden="true">🖼️</span>
         My Gallery
-      </button>
+      </a>
       <a href="index.html" class="sidebar-item" id="nav-home">
         <span class="sidebar-item-icon" aria-hidden="true">🏠</span>
         Home
@@ -586,23 +586,16 @@
       </div>
     </section>
 
-    <!-- Gallery Section -->
-    <section class="gallery-area" aria-label="Generated images gallery">
-      <div class="gallery-header">
-        <h2 class="gallery-title">Your Creations</h2>
-        <span class="gallery-count" id="gallery-count" aria-live="polite">0 images</span>
-      </div>
 
-      <!-- Image grid -->
-      <div class="image-grid" id="gallery" aria-live="polite" aria-label="Generated images"></div>
-
-      <!-- Empty state -->
-      <div class="empty-state" id="empty-state" aria-label="Empty gallery">
-        <div class="empty-state-icon" aria-hidden="true">🎨</div>
-        <div class="empty-state-title">Your canvas is empty</div>
-        <p class="empty-state-desc">Enter a prompt above and click Generate to create your first AI masterpiece.</p>
+    <!-- After Generate: prompt a visit to gallery -->
+    <div style="padding: var(--space-6) var(--space-8); border-top: 1px solid var(--glass-border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-4);">
+      <div>
+        <p style="font-size:var(--text-sm); color:var(--text-secondary);">Generated images are saved to your gallery automatically.</p>
       </div>
-    </section>
+      <a href="gallery.html" class="btn btn-outline" id="view-gallery-btn" style="gap:var(--space-2);">
+        🖼️ View My Gallery →
+      </a>
+    </div>
 
   </main>
 </div>
@@ -666,14 +659,15 @@
 <!-- Toast Container -->
 <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
-<!-- Scripts (order matters: auth → limits → query) -->
+<!-- Scripts (order matters: supabase → auth → limits → query) -->
+<script src="assets/js/supabase.js"></script>
 <script src="assets/js/auth.js"></script>
 <script src="assets/js/limits.js"></script>
 <script src="assets/js/query.js"></script>
 
 <script>
   // Additional UI wiring not in query.js
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     // Sidebar toggle (mobile)
     const sidebar       = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebar-toggle');
@@ -713,16 +707,6 @@
       promptInput.focus();
     });
 
-    // Gallery count updater
-    const galleryEl   = document.getElementById('gallery');
-    const galleryCount = document.getElementById('gallery-count');
-
-    const observer = new MutationObserver(() => {
-      const count = galleryEl.querySelectorAll('.image-card').length;
-      galleryCount.textContent = `${count} image${count !== 1 ? 's' : ''}`;
-    });
-    observer.observe(galleryEl, { childList: true });
-
     // Sidebar usage updater (mirror of main usage)
     function syncSidebarUsage() {
       const count     = limitsGetCount();
@@ -745,30 +729,23 @@
       }
     }
 
+    // Ensure session is primed before reading usage or user info
+    await authInitSession();
+
+    // Refresh count from DB then sync sidebar
+    await limitsRefreshCount();
     syncSidebarUsage();
 
-    // Re-sync sidebar after generation (listen for changes)
-    const origIncrement = window.limitsIncrement;
-    window.origLimitsIncrement = limitsIncrement;
-
     // Also update topbar avatar after init
-    const session = authGetSession();
-    if (session) {
-      document.getElementById('topbar-avatar').textContent = session.name.charAt(0).toUpperCase();
+    const user = authGetUser();
+    if (user) {
+      document.getElementById('topbar-avatar').textContent = user.name.charAt(0).toUpperCase();
     }
 
     // Upgrade button in sidebar
     document.getElementById('upgrade-btn-sidebar').addEventListener('click', () => {
       window.location.href = 'index.html#pricing';
     });
-
-    // Gallery scroll button
-    document.getElementById('nav-gallery-btn').addEventListener('click', () => {
-      document.getElementById('gallery').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-
-    // Periodically sync sidebar usage (after generate events update counts)
-    setInterval(syncSidebarUsage, 1000);
   });
 </script>
 </body>
